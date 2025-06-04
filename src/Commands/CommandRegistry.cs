@@ -14,7 +14,8 @@ namespace xorWallet.Commands
             var commandList = new List<ICommand>
             {
                 new Start(),
-                new Balance()
+                new Balance(),
+                new Check()
                 // Add more commands here
             };
 
@@ -44,7 +45,7 @@ namespace xorWallet.Commands
 
             if (matchingCommand.Value != null)
             {
-                if (matchingCommand.Value is IDebugCommand debugCmd)
+                if (matchingCommand.Value is IDebugCommand)
                 {
                     Logger.Command($"Processing debug command: {normalizedCommand}", "DEBUG");
                 }

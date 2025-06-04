@@ -3,7 +3,6 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using xorWallet.Commands;
-using xorWallet.Processors;
 using xorWallet.Utils;
 
 namespace xorWallet
@@ -12,7 +11,6 @@ namespace xorWallet
     {
         private static TelegramBotClient? _bot;
         private static CancellationTokenSource? _cts;
-        private static long _botId;
         private static CommandRegistry? _commandRegistry;
 
         public static async Task Main()
@@ -22,7 +20,6 @@ namespace xorWallet
             _cts = new CancellationTokenSource();
             _bot = new TelegramBotClient(Secrets.Token);
             var me = await _bot.GetMe();
-            _botId = me.Id;
 
             Logger.Bot($"Bot connected as @{me.Username}", "SUCCESS");
 
@@ -46,21 +43,9 @@ namespace xorWallet
         {
             try
             {
-                if (message.Text == null)
+                if (message.Text!.StartsWith("/"))
                 {
-                    return;
-                }
-
-                if (message.Text.StartsWith("/"))
-                {
-                    if (message.Text.StartsWith("/start"))
-                    {
-                        if (_bot != null) await StartProcessor.ProcessStartAsync(message, _bot);
-                    }
-                    else
-                    {
-                        if (_bot != null) await _commandRegistry?.HandleCommandAsync(message, _bot)!;
-                    }
+                    await _commandRegistry?.HandleCommandAsync(message, _bot!)!;
                 }
             }
             catch (Exception ex)
@@ -89,64 +74,70 @@ namespace xorWallet
         // i chose to send the message that something wrong happened, and send a detailed report in my chat.
         private static async Task OnError(Exception exception, long chatId)
         {
-            if (_bot != null)
+            if (exception is Exceptions.Message)
             {
-                await _bot.SendMessage(chatId,
-                    $"<b>Ах!</b> <i>Что-то пошло не так...</i> Проблема была автоматически передана разработчикам.\n<blockquote expandable><i>{exception.Message}</i></blockquote>",
+                await _bot!.SendMessage(chatId,
+                    $"<b>Ах!</b> <i>Что-то пошло не так...</i>\n<blockquote expandable><i>{exception.Message}</i></blockquote>",
                     ParseMode.Html);
+                return;
+            }
 
-                var errorReport = new StringBuilder();
-                errorReport.AppendLine("<b>🚨 Ой!</b>");
-                errorReport.AppendLine($"<b>Timestamp:</b> {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+            await _bot!.SendMessage(chatId,
+                $"<b>Ах!</b> <i>Что-то пошло не так...</i> Проблема была автоматически передана разработчикам.\n<blockquote expandable><i>{exception.Message}</i></blockquote>",
+                ParseMode.Html);
 
-                errorReport.AppendLine("\n<b>💥 Детали ошибки:</b>");
-                errorReport.AppendLine($"Тип: {exception.GetType().FullName}");
-                errorReport.AppendLine($"Сообщение: {exception.Message}");
+            var errorReport = new StringBuilder();
+            errorReport.AppendLine("<b>🚨 Ой!</b>");
+            errorReport.AppendLine($"<b>Timestamp:</b> {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
 
-                errorReport.AppendLine("\n<b>📚 Stack Trace:</b>");
-                errorReport.AppendLine($"<pre>{exception.StackTrace}</pre>");
+            errorReport.AppendLine("\n<b>💥 Детали ошибки:</b>");
+            errorReport.AppendLine($"Тип: {exception.GetType().FullName}");
+            errorReport.AppendLine($"Сообщение: {exception.Message}");
 
-                if (exception.InnerException != null)
+            errorReport.AppendLine("\n<b>📚 Stack Trace:</b>");
+            errorReport.AppendLine($"<pre>{exception.StackTrace}</pre>");
+
+            if (exception.InnerException != null)
+            {
+                errorReport.AppendLine("\n<b>🔍 Внутренняя ошибка:</b>");
+                errorReport.AppendLine($"Тип: {exception.InnerException.GetType().FullName}");
+                errorReport.AppendLine($"Сообщение: {exception.InnerException.Message}");
+                errorReport.AppendLine($"<pre>{exception.InnerException.StackTrace}</pre>");
+            }
+
+            errorReport.AppendLine("\n<b>💻 Информация про систему на которой бот:</b>");
+            errorReport.AppendLine($"OS: {Environment.OSVersion}");
+            errorReport.AppendLine($"Имя Машины: {Environment.MachineName}");
+            errorReport.AppendLine($"64-bit OS: {Environment.Is64BitOperatingSystem}");
+            errorReport.AppendLine($"Количество Ядер: {Environment.ProcessorCount}");
+            errorReport.AppendLine($"Версия .NET: {Environment.Version}");
+            errorReport.AppendLine($"ОЗУ занято ботом: {Environment.WorkingSet / 1024 / 1024}MB");
+
+            try
+            {
+                const int maxLength = 4096;
+                var reportParts = SplitMessage(errorReport.ToString(), maxLength);
+
+                foreach (var part in reportParts)
                 {
-                    errorReport.AppendLine("\n<b>🔍 Внутренняя ошибка:</b>");
-                    errorReport.AppendLine($"Тип: {exception.InnerException.GetType().FullName}");
-                    errorReport.AppendLine($"Сообщение: {exception.InnerException.Message}");
-                    errorReport.AppendLine($"<pre>{exception.InnerException.StackTrace}</pre>");
-                }
-
-                errorReport.AppendLine("\n<b>💻 Информация про систему на которой бот:</b>");
-                errorReport.AppendLine($"OS: {Environment.OSVersion}");
-                errorReport.AppendLine($"Имя Машины: {Environment.MachineName}");
-                errorReport.AppendLine($"64-bit OS: {Environment.Is64BitOperatingSystem}");
-                errorReport.AppendLine($"Количество Ядер: {Environment.ProcessorCount}");
-                errorReport.AppendLine($"Версия .NET: {Environment.Version}");
-                errorReport.AppendLine($"ОЗУ занято ботом: {Environment.WorkingSet / 1024 / 1024}MB");
-
-                try
-                {
-                    const int maxLength = 4096;
-                    var reportParts = SplitMessage(errorReport.ToString(), maxLength);
-
-                    foreach (var part in reportParts)
-                    {
-                        await _bot.SendMessage(
-                            chatId: -1002589303034,
-                            text: part,
-                            parseMode: ParseMode.Html,
-                            messageThreadId: 80
-                        );
-                        await Task.Delay(500);
-                    }
-                }
-                catch (Exception reportEx)
-                {
-                    await _bot.SendMessage(
+                    await _bot!.SendMessage(
                         chatId: -1002589303034,
-                        text: $"Failed to send formatted error report: {reportEx.Message}\n\nRaw error: {exception}",
+                        text: part,
+                        parseMode: ParseMode.Html,
                         messageThreadId: 80
                     );
+                    await Task.Delay(500);
                 }
             }
+            catch (Exception reportEx)
+            {
+                await _bot!.SendMessage(
+                    chatId: -1002589303034,
+                    text: $"Failed to send formatted error report: {reportEx.Message}\n\nRaw error: {exception}",
+                    messageThreadId: 80
+                );
+            }
+
 
             if (_cts != null) await Task.Delay(2000, _cts.Token);
         }
