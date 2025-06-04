@@ -7,7 +7,7 @@ namespace xorWallet.Commands
 {
     public class CommandRegistry
     {
-        private readonly Dictionary<string, ICommand> _commands = new();
+        private readonly Dictionary<string, ICommand> commands = new();
 
         public CommandRegistry()
         {
@@ -21,11 +21,11 @@ namespace xorWallet.Commands
 
             foreach (var command in commandList)
             {
-                _commands[command.Name.ToLower()] = command;
+                commands[command.Name.ToLower()] = command;
 
-                foreach (var alias in command.Aliases)
+                foreach (string alias in command.Aliases)
                 {
-                    _commands[alias.ToLower()] = command;
+                    commands[alias.ToLower()] = command;
                 }
             }
         }
@@ -36,11 +36,11 @@ namespace xorWallet.Commands
             if (string.IsNullOrEmpty(message.Text))
                 return;
 
-            var commandText = message.Text.Split(' ')[0].ToLower();
+            string commandText = message.Text.Split(' ')[0].ToLower();
 
-            var normalizedCommand = commandText.Split('@')[0];
+            string normalizedCommand = commandText.Split('@')[0];
 
-            var matchingCommand = _commands
+            var matchingCommand = commands
                 .FirstOrDefault(kvp => normalizedCommand.StartsWith(kvp.Key));
 
             if (matchingCommand.Value != null)
@@ -60,10 +60,10 @@ namespace xorWallet.Commands
 
         public async Task SendHelpMessage(Message message, TelegramBotClient bot)
         {
-            var helpMessage = "<b>Доступные команды:</b>\n\n";
+            string helpMessage = "<b>Доступные команды:</b>\n\n";
             var listed = new HashSet<ICommand>();
 
-            foreach (var command in _commands.Values.Distinct())
+            foreach (var command in commands.Values.Distinct())
             {
                 if (!listed.Add(command)) continue;
 
@@ -73,7 +73,7 @@ namespace xorWallet.Commands
                         continue;
                 }
 
-                var aliasText = command.Aliases.Length > 0
+                string aliasText = command.Aliases.Length > 0
                     ? $" ({string.Join(", ", command.Aliases)})"
                     : "";
 
@@ -84,6 +84,6 @@ namespace xorWallet.Commands
                 linkPreviewOptions: new LinkPreviewOptions { IsDisabled = true });
         }
 
-        public IReadOnlyDictionary<string, ICommand> Commands => _commands.AsReadOnly();
+        public IReadOnlyDictionary<string, ICommand> Commands => commands.AsReadOnly();
     }
 }
