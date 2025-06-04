@@ -10,8 +10,8 @@ namespace xorWallet
     {
         //* the brain of the bot
 
-        private readonly IMongoCollection<User> _userCollection;
-        private readonly IMongoCollection<Check> _checkCollection;
+        private readonly IMongoCollection<User> userCollection;
+        private readonly IMongoCollection<Check> checkCollection;
 
         /// <summary>
         /// Constructor that connects to the MongoDB, gets the database, and inside that database gets a collection of users
@@ -20,12 +20,12 @@ namespace xorWallet
         {
             //! remember to make a Secrets.cs file.
             //! also, remember to change the ip
-            var connectionString = $"mongodb://{Secrets.DB_Username}:{Secrets.DB_Password}@192.168.222.222:27017";
+            string connectionString = $"mongodb://{Secrets.DB_USERNAME}:{Secrets.DB_PASSWORD}@192.168.222.222:27017";
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase("xorWallet");
 
-            _userCollection = database.GetCollection<User>("Users");
-            _checkCollection = database.GetCollection<Check>("Checks");
+            userCollection = database.GetCollection<User>("Users");
+            checkCollection = database.GetCollection<Check>("Checks");
         }
 
         /// <summary>
@@ -36,11 +36,11 @@ namespace xorWallet
         /// <returns>A <see cref="User"/> object.</returns>
         public async Task<User> GetUserAsync(long userId)
         {
-            var user = await _userCollection.Find(u => u.UserId == userId).FirstOrDefaultAsync();
+            var user = await userCollection.Find(u => u.UserId == userId).FirstOrDefaultAsync();
             if (user == null)
             {
                 await CreateUserAsync(userId);
-                user = await _userCollection.Find(u => u.UserId == userId).FirstOrDefaultAsync();
+                user = await userCollection.Find(u => u.UserId == userId).FirstOrDefaultAsync();
             }
 
             return user;
@@ -54,7 +54,7 @@ namespace xorWallet
         public async Task CreateUserAsync(long userId)
         {
             var user = new User { UserId = userId };
-            await _userCollection.InsertOneAsync(user);
+            await userCollection.InsertOneAsync(user);
         }
 
 
@@ -74,7 +74,7 @@ namespace xorWallet
             }
 
             var update = Builders<User>.Update.Inc(u => u.Balance, delta);
-            await _userCollection.UpdateOneAsync(u => u.UserId == userId, update);
+            await userCollection.UpdateOneAsync(u => u.UserId == userId, update);
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace xorWallet
                 Activations = activations,
             };
             await UpdateBalanceAsync(userId, -(xors * activations));
-            await _checkCollection.InsertOneAsync(check);
+            await checkCollection.InsertOneAsync(check);
 
             return $"Check_{check.Id}";
         }
@@ -129,7 +129,7 @@ namespace xorWallet
         /// <returns>А <see cref="Check"/>, if check is non-existent, null</returns>
         public async Task<Check?> GetCheckAsync(string? checkId)
         {
-            return await _checkCollection.Find(check => check.Id == checkId).FirstOrDefaultAsync();
+            return await checkCollection.Find(check => check.Id == checkId).FirstOrDefaultAsync();
         }
 
         public async Task UpdateCheckAsync(string? checkId, long userId)
@@ -149,14 +149,14 @@ namespace xorWallet
                 .Inc(c => c.Activations, -1)
                 .Push(c => c.UserActivated, userId);
 
-            await _checkCollection.UpdateOneAsync(c => c.Id == check.Id, update);
+            await checkCollection.UpdateOneAsync(c => c.Id == check.Id, update);
 
             await UpdateBalanceAsync(userId, check.Xors);
 
             var updatedCheck = await GetCheckAsync(check.Id);
             if (updatedCheck is { Activations: <= 0 })
             {
-                await _checkCollection.DeleteOneAsync(c => c.Id == updatedCheck.Id);
+                await checkCollection.DeleteOneAsync(c => c.Id == updatedCheck.Id);
             }
         }
     }

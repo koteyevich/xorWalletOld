@@ -9,33 +9,33 @@ namespace xorWallet
 {
     public static class Program
     {
-        private static TelegramBotClient? _bot;
-        private static CancellationTokenSource? _cts;
-        private static CommandRegistry? _commandRegistry;
+        private static TelegramBotClient? bot;
+        private static CancellationTokenSource? cts;
+        private static CommandRegistry? commandRegistry;
 
         public static async Task Main()
         {
             Logger.Bot("Bot starting", "INFO");
 
-            _cts = new CancellationTokenSource();
-            _bot = new TelegramBotClient(Secrets.Token);
-            var me = await _bot.GetMe();
+            cts = new CancellationTokenSource();
+            bot = new TelegramBotClient(Secrets.TOKEN);
+            var me = await bot.GetMe();
 
             Logger.Bot($"Bot connected as @{me.Username}", "SUCCESS");
 
-            _commandRegistry = new CommandRegistry();
+            commandRegistry = new CommandRegistry();
 
-            _bot.OnMessage += async (message, _) => { await OnMessage(message); };
-            _bot.OnUpdate += OnUpdate;
+            bot.OnMessage += async (message, _) => { await OnMessage(message); };
+            bot.OnUpdate += OnUpdate;
 
-            AppDomain.CurrentDomain.ProcessExit += (_, _) => _cts?.Cancel();
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => cts?.Cancel();
             Console.CancelKeyPress += (_, e) =>
             {
                 e.Cancel = true;
-                _cts?.Cancel();
+                cts?.Cancel();
             };
 
-            await Task.Delay(Timeout.Infinite, _cts.Token);
+            await Task.Delay(Timeout.Infinite, cts.Token);
             Logger.Bot("Bot shutting down", "INFO");
         }
 
@@ -45,7 +45,7 @@ namespace xorWallet
             {
                 if (message.Text!.StartsWith("/"))
                 {
-                    await _commandRegistry?.HandleCommandAsync(message, _bot!)!;
+                    await commandRegistry?.HandleCommandAsync(message, bot!)!;
                 }
             }
             catch (Exception ex)
@@ -58,7 +58,7 @@ namespace xorWallet
         {
             if (update.Type == UpdateType.CallbackQuery)
             {
-                var decrypted = Encryption.DecryptCallback(update.CallbackQuery?.Data!);
+                string? decrypted = Encryption.DecryptCallback(update.CallbackQuery?.Data!);
                 Logger.Log($"Raw callback data: {update.CallbackQuery}", "CALLBACK", "DEBUG");
                 Logger.Log($"Decrypted callback data: {(decrypted ?? "null")}", "CALLBACK", "DEBUG");
 
@@ -76,13 +76,13 @@ namespace xorWallet
         {
             if (exception is Exceptions.Message)
             {
-                await _bot!.SendMessage(chatId,
+                await bot!.SendMessage(chatId,
                     $"<b>Ах!</b> <i>Что-то пошло не так...</i>\n<blockquote expandable><i>{exception.Message}</i></blockquote>",
                     ParseMode.Html);
                 return;
             }
 
-            await _bot!.SendMessage(chatId,
+            await bot!.SendMessage(chatId,
                 $"<b>Ах!</b> <i>Что-то пошло не так...</i> Проблема была автоматически передана разработчикам.\n<blockquote expandable><i>{exception.Message}</i></blockquote>",
                 ParseMode.Html);
 
@@ -115,12 +115,12 @@ namespace xorWallet
 
             try
             {
-                const int maxLength = 4096;
-                var reportParts = SplitMessage(errorReport.ToString(), maxLength);
+                const int max_length = 4096;
+                var reportParts = splitMessage(errorReport.ToString(), max_length);
 
-                foreach (var part in reportParts)
+                foreach (string part in reportParts)
                 {
-                    await _bot!.SendMessage(
+                    await bot!.SendMessage(
                         chatId: -1002589303034,
                         text: part,
                         parseMode: ParseMode.Html,
@@ -131,20 +131,21 @@ namespace xorWallet
             }
             catch (Exception reportEx)
             {
-                await _bot!.SendMessage(
+                await bot!.SendMessage(
                     chatId: -1002589303034,
-                    text: $"Failed to send formatted error report: {reportEx.Message}\n\nRaw error: {exception}",
+                    text:
+                    $"Failed to send formatted error report: {reportEx.Message}\n\nRaw error: {exception}",
                     messageThreadId: 80
                 );
             }
 
 
-            if (_cts != null) await Task.Delay(2000, _cts.Token);
+            if (cts != null) await Task.Delay(2000, cts.Token);
         }
 
-        private static IEnumerable<string> SplitMessage(string message, int maxLength)
+        private static IEnumerable<string> splitMessage(string message, int maxLength)
         {
-            for (var i = 0; i < message.Length; i += maxLength)
+            for (int i = 0; i < message.Length; i += maxLength)
             {
                 yield return message.Substring(i, Math.Min(maxLength, message.Length - i));
             }

@@ -8,7 +8,7 @@ namespace xorWallet.Processors
     {
         public static async Task ProcessStartAsync(Message message, TelegramBotClient bot)
         {
-            var args = message.Text?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string[]? args = message.Text?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (message.Chat.Type == ChatType.Private)
             {
@@ -18,7 +18,7 @@ namespace xorWallet.Processors
                     {
                         var database = new Database();
 
-                        var checkId = args[1].Replace("Check_", "");
+                        string checkId = args[1].Replace("Check_", "");
                         var check = await database.GetCheckAsync(checkId);
 
                         if (check != null)

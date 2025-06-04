@@ -5,29 +5,29 @@ namespace xorWallet.Utils
 {
     public static class Encryption
     {
-        private static readonly byte[] AesKey = SHA256.HashData(Encoding.UTF8.GetBytes(Secrets.CallbackSalt));
-        private static readonly byte[] AesIv = AesKey.Take(16).ToArray();
+        private static readonly byte[] aes_key = SHA256.HashData(Encoding.UTF8.GetBytes(Secrets.CALLBACK_SALT));
+        private static readonly byte[] aes_iv = aes_key.Take(16).ToArray();
 
         public static string EncryptCallback(string data)
         {
             try
             {
                 using var aes = Aes.Create();
-                aes.Key = AesKey;
-                aes.IV = AesIv;
+                aes.Key = aes_key;
+                aes.IV = aes_iv;
 
-                var hash = SHA256.HashData(Encoding.UTF8.GetBytes(data + Secrets.CallbackSalt));
-                var shortHash = hash.Take(4).ToArray();
+                byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(data + Secrets.CALLBACK_SALT));
+                byte[] shortHash = hash.Take(4).ToArray();
 
-                var dataBytes = Encoding.UTF8.GetBytes(data);
-                var combined = new byte[dataBytes.Length + shortHash.Length];
+                byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+                byte[] combined = new byte[dataBytes.Length + shortHash.Length];
                 dataBytes.CopyTo(combined, 0);
                 shortHash.CopyTo(combined, dataBytes.Length);
 
                 using var encryptor = aes.CreateEncryptor();
-                var encrypted = encryptor.TransformFinalBlock(combined, 0, combined.Length);
+                byte[] encrypted = encryptor.TransformFinalBlock(combined, 0, combined.Length);
 
-                var base64 = Convert.ToBase64String(encrypted)
+                string base64 = Convert.ToBase64String(encrypted)
                     .TrimEnd('=')
                     .Replace('+', '-')
                     .Replace('/', '_');
@@ -52,28 +52,28 @@ namespace xorWallet.Utils
         {
             try
             {
-                var base64 = encrypted.Replace('-', '+').Replace('_', '/');
+                string base64 = encrypted.Replace('-', '+').Replace('_', '/');
                 switch (base64.Length % 4)
                 {
                     case 2: base64 += "=="; break;
                     case 3: base64 += "="; break;
                 }
 
-                var encryptedBytes = Convert.FromBase64String(base64);
+                byte[] encryptedBytes = Convert.FromBase64String(base64);
 
                 using var aes = Aes.Create();
-                aes.Key = AesKey;
-                aes.IV = AesIv;
+                aes.Key = aes_key;
+                aes.IV = aes_iv;
 
                 using var decryptor = aes.CreateDecryptor();
-                var decrypted = decryptor.TransformFinalBlock(encryptedBytes, 0, encryptedBytes.Length);
+                byte[] decrypted = decryptor.TransformFinalBlock(encryptedBytes, 0, encryptedBytes.Length);
 
-                var dataLength = decrypted.Length - 4;
-                var data = Encoding.UTF8.GetString(decrypted, 0, dataLength);
-                var receivedHash = decrypted.Skip(dataLength).Take(4).ToArray();
+                int dataLength = decrypted.Length - 4;
+                string data = Encoding.UTF8.GetString(decrypted, 0, dataLength);
+                byte[] receivedHash = decrypted.Skip(dataLength).Take(4).ToArray();
 
-                var computedHash = SHA256.HashData(Encoding.UTF8.GetBytes(data + Secrets.CallbackSalt));
-                var shortHash = computedHash.Take(4).ToArray();
+                byte[] computedHash = SHA256.HashData(Encoding.UTF8.GetBytes(data + Secrets.CALLBACK_SALT));
+                byte[] shortHash = computedHash.Take(4).ToArray();
 
                 if (!shortHash.SequenceEqual(receivedHash))
                 {
