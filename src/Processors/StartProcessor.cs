@@ -1,8 +1,6 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using xorWallet.Utils;
-
 
 namespace xorWallet.Processors
 {
@@ -40,7 +38,7 @@ namespace xorWallet.Processors
                             await database.UpdateCheckAsync(check, message.From!.Id);
 
                             var user = await database.GetUserAsync(message.From.Id);
-                            await bot.SendMessage(message.Chat.Id, $"Готово!\nНовый баланс: {user?.Balance} xor'ов");
+                            await bot.SendMessage(message.Chat.Id, $"Готово!\nНовый баланс: {user.Balance} xor'ов");
                         }
                         else
                         {

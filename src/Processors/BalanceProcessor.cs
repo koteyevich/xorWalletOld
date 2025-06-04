@@ -13,13 +13,8 @@ public abstract class BalanceProcessor
             var db = new Database();
 
             var user = await db.GetUserAsync(userId);
-            if (user == null)
-            {
-                await db.CreateUserAsync(userId);
-                user = await db.GetUserAsync(userId);
-            }
 
-            await bot.SendMessage(userId, "Your balance is: " + user?.Balance);
+            await bot.SendMessage(userId, "Your balance is: " + user.Balance);
         }
         catch (BotException e)
         {

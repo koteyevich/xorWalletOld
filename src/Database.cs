@@ -127,12 +127,12 @@ namespace xorWallet
         /// </summary>
         /// <param name="checkId">Check ID that is used to find that check in a database.</param>
         /// <returns>А <see cref="Check"/>, if check is non-existent, null</returns>
-        public async Task<Check?> GetCheckAsync(string checkId)
+        public async Task<Check?> GetCheckAsync(string? checkId)
         {
             return await _checkCollection.Find(check => check.Id == checkId).FirstOrDefaultAsync();
         }
 
-        public async Task UpdateCheckAsync(string checkId, long userId)
+        public async Task UpdateCheckAsync(string? checkId, long userId)
         {
             var check = await GetCheckAsync(checkId);
             if (check == null)
