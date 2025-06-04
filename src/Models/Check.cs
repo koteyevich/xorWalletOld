@@ -1,11 +1,10 @@
-using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace xorWallet.Models;
 
 public class Check
 {
-    [BsonId] public string Id { get; set; }
+    [BsonId] public string? Id { get; set; }
 
     public long CheckOwnerUid { get; set; }
 

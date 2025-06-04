@@ -10,7 +10,7 @@ public abstract class CheckProcessor
     public static async Task CheckAsync(Message message, TelegramBotClient bot)
     {
         var db = new Database();
-        var args = message.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var args = message.Text!.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         if (args.Length < 3)
         {
@@ -18,7 +18,7 @@ public abstract class CheckProcessor
                 "Not enough arguments. Example usage: /check 10 (xors) 4 (amount of activations)");
         }
 
-        var userId = message.From.Id;
+        var userId = message.From!.Id;
         var xors = int.Parse(args[1]);
         var activations = int.Parse(args[2]);
 
