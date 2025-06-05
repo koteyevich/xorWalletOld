@@ -26,22 +26,7 @@ namespace xorWallet.Processors
 
                         if (check != null)
                         {
-                            if (check.CheckOwnerUid == message.From?.Id)
-                            {
-                                await checkOwner(message, bot, check);
-                                return;
-                            }
-
-                            if (check.UserActivated.Any(uid => uid == message.From?.Id))
-                            {
-                                throw new Exceptions.Message(
-                                    "You've already activated this check! Leave some for others...");
-                            }
-
-                            await database.UpdateCheckAsync(check, message.From!.Id);
-
-                            var user = await database.GetUserAsync(message.From.Id);
-                            await bot.SendMessage(message.Chat.Id, $"Готово!\nНовый баланс: {user.Balance} xor'ов");
+                            await checkActivation(message, bot, check, database);
                         }
                         else
                         {
@@ -61,6 +46,27 @@ namespace xorWallet.Processors
                     linkPreviewOptions: new LinkPreviewOptions { IsDisabled = true }
                 );
             }
+        }
+
+        private static async Task checkActivation(Message message, TelegramBotClient bot, Check check,
+            Database database)
+        {
+            if (check.CheckOwnerUid == message.From?.Id)
+            {
+                await checkOwner(message, bot, check);
+                return;
+            }
+
+            if (check.UserActivated.Any(uid => uid == message.From?.Id))
+            {
+                throw new Exceptions.Message(
+                    "You've already activated this check! Leave some for others...");
+            }
+
+            await database.UpdateCheckAsync(check, message.From!.Id);
+
+            var user = await database.GetUserAsync(message.From.Id);
+            await bot.SendMessage(message.Chat.Id, $"Готово!\nНовый баланс: {user.Balance} xor'ов");
         }
 
         private static async Task checkOwner(Message message, TelegramBotClient bot, Check check)
