@@ -125,7 +125,7 @@ namespace xorWallet
         /// <summary>
         /// Gets a <see cref="Check"/>, if it exists.
         /// </summary>
-        /// <param name="checkId">Check ID that is used to find that check in a database.</param>
+        /// <param name="checkId">Check ID used to find that check in a database.</param>
         /// <returns>А <see cref="Check"/>, if check is non-existent, null</returns>
         public async Task<Check?> GetCheckAsync(string? checkId)
         {
@@ -158,6 +158,11 @@ namespace xorWallet
             {
                 await checkCollection.DeleteOneAsync(c => c.Id == updatedCheck.Id);
             }
+        }
+
+        public async Task RemoveCheckAsync(string? checkId)
+        {
+            await checkCollection.DeleteOneAsync(c => c.Id == checkId);
         }
     }
 }

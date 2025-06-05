@@ -39,7 +39,7 @@ namespace xorWallet.Processors
             botMessage.AppendLine("Готово!");
             botMessage.AppendLine(
                 $"Поделитесь этой ссылкой для активации: <code>https://t.me/xorwallet_bot?start={check}</code>");
-            botMessage.AppendLine($"Ваш новый баланс: {user.Balance}");
+            botMessage.AppendLine($"Ваш новый баланс: {user.Balance} (- {xors * activations} xor'ов)");
             await bot.SendMessage(message.Chat.Id, botMessage.ToString(), ParseMode.Html);
         }
     }
