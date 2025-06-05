@@ -1,6 +1,9 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
+using xorWallet.Models;
+using xorWallet.Utils;
 
 namespace xorWallet.Processors
 {
@@ -25,8 +28,8 @@ namespace xorWallet.Processors
                         {
                             if (check.CheckOwnerUid == message.From?.Id)
                             {
-                                throw new Exceptions.Message(
-                                    "You are an owner of this check. Soon there will be an ability to revoke your checks.");
+                                await CheckOwner(message, bot, check);
+                                return;
                             }
 
                             if (check.UserActivated.Any(uid => uid == message.From?.Id))
@@ -58,6 +61,21 @@ namespace xorWallet.Processors
                     linkPreviewOptions: new LinkPreviewOptions { IsDisabled = true }
                 );
             }
+        }
+
+        static async Task CheckOwner(Message message, TelegramBotClient bot, Check check)
+        {
+            var keyboard = new InlineKeyboardMarkup();
+            var revokeCheckButton =
+                new InlineKeyboardButton("Отозвать чек", Encryption.EncryptCallback($"revokecheck_{check.Id}"));
+
+            keyboard.AddButton(revokeCheckButton);
+
+            await bot.SendMessage(message.Chat.Id,
+                $"Это ваш чек, вы можете его отозвать.\n" +
+                $"Осталось активаций: {check.Activations}\n" +
+                $"Если вы сейчас отзовёте чек, то вернёте себе {check.Activations * check.Xors} xor'ов",
+                replyMarkup: keyboard);
         }
     }
 }

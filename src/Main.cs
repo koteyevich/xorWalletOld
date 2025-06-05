@@ -2,6 +2,7 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using xorWallet.Callbacks;
 using xorWallet.Commands;
 using xorWallet.Utils;
 
@@ -11,7 +12,9 @@ namespace xorWallet
     {
         private static TelegramBotClient? bot;
         private static CancellationTokenSource? cts;
+
         private static CommandRegistry? commandRegistry;
+        private static CallbackRegistry? callbackRegistry;
 
         public static async Task Main()
         {
@@ -24,6 +27,7 @@ namespace xorWallet
             Logger.Bot($"Bot connected as @{me.Username}", "SUCCESS");
 
             commandRegistry = new CommandRegistry();
+            callbackRegistry = new CallbackRegistry();
 
             bot.OnMessage += async (message, _) => { await OnMessage(message); };
             bot.OnUpdate += OnUpdate;
@@ -58,14 +62,14 @@ namespace xorWallet
         {
             if (update.Type == UpdateType.CallbackQuery)
             {
-                string? decrypted = Encryption.DecryptCallback(update.CallbackQuery?.Data!);
-                Logger.Log($"Raw callback data: {update.CallbackQuery}", "CALLBACK", "DEBUG");
-                Logger.Log($"Decrypted callback data: {(decrypted ?? "null")}", "CALLBACK", "DEBUG");
-
-                //if (decrypted != null && decrypted.StartsWith("captcha_"))
-                //{
-                //    await CaptchaProcessor.HandleCaptchaCallback(update.CallbackQuery, _bot, Db);
-                //}
+                try
+                {
+                    await callbackRegistry?.HandleCallbackAsync(update.CallbackQuery!, bot!)!;
+                }
+                catch (Exception ex)
+                {
+                    await OnError(ex, update.CallbackQuery!.Message!.Chat.Id);
+                }
             }
         }
 
