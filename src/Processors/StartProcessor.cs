@@ -15,7 +15,7 @@ namespace xorWallet.Processors
 
             if (message.Chat.Type == ChatType.Private)
             {
-                if (args is { Length: < 3 })
+                if (args is { Length: > 1 })
                 {
                     if (args[1].StartsWith("Check_"))
                     {
