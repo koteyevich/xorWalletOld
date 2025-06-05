@@ -28,7 +28,7 @@ namespace xorWallet.Processors
                         {
                             if (check.CheckOwnerUid == message.From?.Id)
                             {
-                                await CheckOwner(message, bot, check);
+                                await checkOwner(message, bot, check);
                                 return;
                             }
 
@@ -63,11 +63,11 @@ namespace xorWallet.Processors
             }
         }
 
-        static async Task CheckOwner(Message message, TelegramBotClient bot, Check check)
+        private static async Task checkOwner(Message message, TelegramBotClient bot, Check check)
         {
             var keyboard = new InlineKeyboardMarkup();
             var revokeCheckButton =
-                new InlineKeyboardButton("Отозвать чек", Encryption.EncryptCallback($"revokecheck_{check.Id}"));
+                EncryptedInlineButton.InlineButton("Отозвать чек", $"revokecheck_{check.Id}");
 
             keyboard.AddButton(revokeCheckButton);
 
