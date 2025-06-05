@@ -2,34 +2,29 @@ using Telegram.Bot;
 using xorWallet.Exceptions;
 using xorWallet.Utils;
 
-namespace xorWallet.Processors;
-
-public abstract class BalanceProcessor
+namespace xorWallet.Processors
 {
-    public static async Task BalanceAsync(long userId, TelegramBotClient bot)
+    public abstract class BalanceProcessor
     {
-        try
+        public static async Task BalanceAsync(long userId, TelegramBotClient bot)
         {
-            var db = new Database();
-
-            var user = await db.GetUserAsync(userId);
-            if (user == null)
+            try
             {
-                await db.CreateUserAsync(userId);
-                user = await db.GetUserAsync(userId);
-            }
+                var db = new Database();
+                var user = await db.GetUserAsync(userId);
 
-            await bot.SendMessage(userId, "Your balance is: " + user?.Balance);
-        }
-        catch (BotException e)
-        {
-            Logger.Error($"shit hit the fan in balance: {e.Message}");
-            throw;
-        }
-        catch (Exception e)
-        {
-            Logger.Error($"shit hit the fan balance: {e.Message}");
-            throw;
+                await bot.SendMessage(userId, "Your balance is: " + user.Balance);
+            }
+            catch (BotException e)
+            {
+                Logger.Error($"shit hit the fan in balance: {e.Message}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"shit hit the fan balance: {e.Message}");
+                throw;
+            }
         }
     }
 }

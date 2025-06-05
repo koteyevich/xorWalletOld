@@ -1,5 +1,6 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using xorWallet.Utils;
 
 namespace xorWallet.Interfaces
 {
@@ -22,6 +23,7 @@ namespace xorWallet.Interfaces
         public async Task ExecuteAsync(Message message, TelegramBotClient bot)
         {
             await ExecuteCoreAsync(message, bot);
+            Logger.Command($"Processing {Name} command.");
         }
 
         protected abstract Task ExecuteCoreAsync(Message message, TelegramBotClient bot);

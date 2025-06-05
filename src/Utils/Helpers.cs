@@ -5,11 +5,11 @@ namespace xorWallet.Utils
         //* the fingers of the bot
 
 
-        private static readonly List<long> DeveloperIds = [935813811];
+        private static readonly List<long> developer_ids = [935813811];
 
         public static async Task<bool> CheckDeveloper(long userId)
         {
-            return await Task.FromResult(DeveloperIds.Contains(userId));
+            return await Task.FromResult(developer_ids.Contains(userId));
         }
     }
 }

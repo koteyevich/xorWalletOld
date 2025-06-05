@@ -5,17 +5,17 @@ using xorWallet.Processors;
 
 namespace xorWallet.Commands
 {
-    public class Balance : CommandBase
+    public class Check : CommandBase
     {
-        public override string Name => "/balance";
+        public override string Name => "/Check";
 
-        public override string Description => "Ваш баланс.";
+        public override string Description => "Создать чек.";
 
         public override string[] Aliases => [];
 
         protected override async Task ExecuteCoreAsync(Message message, TelegramBotClient bot)
         {
-            if (message.From != null) await BalanceProcessor.BalanceAsync(message.From.Id, bot);
+            await CheckProcessor.CheckAsync(message, bot);
         }
     }
 }
