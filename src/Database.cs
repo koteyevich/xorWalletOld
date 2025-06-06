@@ -1,3 +1,4 @@
+using System.Text;
 using MongoDB.Driver;
 using xorWallet.Exceptions;
 using xorWallet.Models;
@@ -194,6 +195,53 @@ namespace xorWallet
         public async Task RemoveInvoiceAsync(string? invoiceId)
         {
             await invoiceCollection.DeleteOneAsync(c => c.Id == invoiceId);
+        }
+
+        public async Task<StringBuilder> ListUserChecks(long userId)
+        {
+            var cursor = await checkCollection.FindAsync(c => c.CheckOwnerUid == userId);
+            var checks = await cursor.ToListAsync();
+
+            var sb = new StringBuilder();
+            if (checks.Count == 0)
+            {
+                sb.AppendLine("У вас нет активных чеков.");
+            }
+            else
+            {
+                sb.AppendLine("Ваши активные чеки:");
+                foreach (var check in checks)
+                {
+                    sb.AppendLine(
+                        $"• ID: {check.Id} — {check.Xors} XOR, осталось активаций: {check.Activations} <a href=\"{StartUrlGenerator.GenerateStartUrl($"Check_{check.Id}")}\">🗑</a>");
+                }
+            }
+
+            return sb;
+        }
+
+
+        public async Task<StringBuilder> ListUserInvoices(long userId)
+        {
+            var cursor = await invoiceCollection.FindAsync(c => c.InvoiceOwnerUid == userId);
+            var invoices = await cursor.ToListAsync();
+
+            var sb = new StringBuilder();
+            if (invoices.Count == 0)
+            {
+                sb.AppendLine("У вас нет активных счетов.");
+            }
+            else
+            {
+                sb.AppendLine("Ваши активные счета:");
+                foreach (var invoice in invoices)
+                {
+                    sb.AppendLine(
+                        $"• ID: {invoice.Id} — {invoice.Xors} XOR <a href=\"{StartUrlGenerator.GenerateStartUrl($"Invoice_{invoice.Id}")}\">🗑</a>");
+                }
+            }
+
+            return sb;
         }
     }
 }
