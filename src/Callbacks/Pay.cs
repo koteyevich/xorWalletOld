@@ -32,14 +32,15 @@ namespace xorWallet.Callbacks
 
                         invoiceOwner = await database.GetUserAsync(invoice.InvoiceOwnerUid);
                         payer = await database.GetUserAsync(callbackQuery.From.Id);
-                        await bot.SendMessage(invoiceOwner.UserId, $"Чек на {invoice.Xors} xor'ов был оплачен!\n" +
-                                                                   $"Ваш новый баланс: {invoiceOwner.Balance} (+ {invoice.Xors} xor'ов)");
+                        await bot.SendMessage(invoiceOwner.UserId,
+                            $"Счёт на {invoice.Xors} xor'ов был оплачен пользователем {(callbackQuery.From.Username != null ? callbackQuery.From.Username : callbackQuery.From.Id)}!\n" +
+                            $"Ваш новый баланс: {invoiceOwner.Balance} (+ {invoice.Xors} xor'ов)");
                         await bot.SendMessage(payer.UserId,
-                            $"Вы оплатили чек на {invoice.Xors} xor'ов.\n" +
+                            $"Вы оплатили счёт на {invoice.Xors} xor'ов.\n" +
                             $"Ваш новый баланс: {payer.Balance}");
 
-                        await database.DeleteInvoiceAsync(invoiceId);
-                        await bot.DeleteMessage(callbackQuery.From.Id, callbackQuery.Message.MessageId);
+                        await database.RemoveInvoiceAsync(invoiceId);
+                        await bot.DeleteMessage(callbackQuery.From.Id, callbackQuery.Message!.MessageId);
                     }
                     else
                     {

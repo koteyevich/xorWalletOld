@@ -191,7 +191,7 @@ namespace xorWallet
             return await invoiceCollection.Find(invoice => invoice.Id == invoiceId).FirstOrDefaultAsync();
         }
 
-        public async Task DeleteInvoiceAsync(string? invoiceId)
+        public async Task RemoveInvoiceAsync(string? invoiceId)
         {
             await invoiceCollection.DeleteOneAsync(c => c.Id == invoiceId);
         }

@@ -76,13 +76,13 @@ namespace xorWallet.Processors
 
             var keyboard = new InlineKeyboardMarkup();
             var acceptButton =
-                EncryptedInlineButton.InlineButton($"Оплатить {invoice.Xors} xor", $"pay_Invoice_{invoice.Id}");
-            var rejectButton = EncryptedInlineButton.InlineButton("Отклонить", "decline");
+                EncryptedInlineButton.InlineButton($"✅ Оплатить {invoice.Xors} xor", $"pay_Invoice_{invoice.Id}");
+            var rejectButton = EncryptedInlineButton.InlineButton("❎ Отклонить", "decline");
 
             keyboard.AddButton(acceptButton);
             keyboard.AddNewRow(rejectButton);
 
-            await bot.SendMessage(message.Chat.Id, $"Чек на {invoice.Xors} xor'ов", replyMarkup: keyboard);
+            await bot.SendMessage(message.Chat.Id, $"💰 Чек на {invoice.Xors} xor'ов", replyMarkup: keyboard);
         }
 
         private static async Task checkActivation(Message message, TelegramBotClient bot, Check check,
@@ -109,20 +109,21 @@ namespace xorWallet.Processors
         private static async Task invoiceOwner(Message message, TelegramBotClient bot, Invoice invoice)
         {
             var keyboard = new InlineKeyboardMarkup();
-            var revokeCheckButton = EncryptedInlineButton.InlineButton("Отозвать счёт", $"revokeinvoice_{invoice.Id}");
+            var revokeCheckButton =
+                EncryptedInlineButton.InlineButton("⬅️ Отозвать счёт", $"revokeinvoice_{invoice.Id}");
 
             keyboard.AddButton(revokeCheckButton);
 
             await bot.SendMessage(message.Chat.Id,
                 $"Это ваш счёт, вы можете его отозвать.\n" +
-                $"Вы точно хотите отозвать чек на {invoice.Xors} xor'ов?", replyMarkup: keyboard);
+                $"Вы точно хотите отозвать счёт на {invoice.Xors} xor'ов?", replyMarkup: keyboard);
         }
 
         private static async Task checkOwner(Message message, TelegramBotClient bot, Check check)
         {
             var keyboard = new InlineKeyboardMarkup();
             var revokeCheckButton =
-                EncryptedInlineButton.InlineButton("Отозвать чек", $"revokecheck_{check.Id}");
+                EncryptedInlineButton.InlineButton("⬅️ Отозвать чек", $"revokecheck_{check.Id}");
 
             keyboard.AddButton(revokeCheckButton);
 
