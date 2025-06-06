@@ -16,7 +16,9 @@ namespace xorWallet.Callbacks
                 new RevokeCheckCallback(),
                 new RevokeInvoiceCallback(),
                 new Decline(),
-                new Pay()
+                new Pay(),
+                new MyChecksCallback(),
+                new MyInvoicesCallback(),
             };
 
             foreach (var cb in callbackList)
@@ -46,6 +48,9 @@ namespace xorWallet.Callbacks
             }
             else
             {
+                if (query.Data == "null")
+                    return;
+
                 await bot.AnswerCallbackQuery(query.Id, "Неизвестная кнопка.");
             }
         }
