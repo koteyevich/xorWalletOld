@@ -43,7 +43,7 @@ namespace xorWallet.Processors
 
                         if (invoice != null)
                         {
-                            await invoiceActivation(message, bot, invoice, database);
+                            await invoiceActivation(message, bot, invoice);
                         }
                         else
                         {
@@ -65,8 +65,7 @@ namespace xorWallet.Processors
             }
         }
 
-        private static async Task invoiceActivation(Message message, TelegramBotClient bot, Invoice invoice,
-            Database database)
+        private static async Task invoiceActivation(Message message, TelegramBotClient bot, Invoice invoice)
         {
             if (invoice.InvoiceOwnerUid == message.From?.Id)
             {
@@ -82,7 +81,7 @@ namespace xorWallet.Processors
             keyboard.AddButton(acceptButton);
             keyboard.AddNewRow(rejectButton);
 
-            await bot.SendMessage(message.Chat.Id, $"💰 Чек на {invoice.Xors} xor'ов", replyMarkup: keyboard);
+            await bot.SendMessage(message.Chat.Id, $"💰 Счёт на {invoice.Xors} xor'ов", replyMarkup: keyboard);
         }
 
         private static async Task checkActivation(Message message, TelegramBotClient bot, Check check,
