@@ -71,7 +71,7 @@ namespace xorWallet
 
             if (user.Balance + delta < 0)
             {
-                throw new Message("User balance cannot be negative");
+                throw new Message("User balance cannot be negative. Insufficient balance.");
             }
 
             var update = Builders<User>.Update.Inc(u => u.Balance, delta);

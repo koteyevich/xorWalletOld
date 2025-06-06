@@ -12,7 +12,7 @@ namespace xorWallet.Processors
             var db = new Database();
             string[] args = message.Text!.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            if (args.Length < 3)
+            if (args.Length < 2)
             {
                 throw new ArgumentException(
                     "Not enough arguments. Example usage: /invoice 10 (xors)");
