@@ -102,7 +102,7 @@ namespace xorWallet.Processors
             await database.UpdateCheckAsync(check, message.From!.Id);
 
             var user = await database.GetUserAsync(message.From.Id);
-            await bot.SendMessage(message.Chat.Id, $"Готово!\nНовый баланс: {user.Balance} xor'ов");
+            await bot.SendMessage(message.Chat.Id, $"Готово!\nНовый баланс: {user.Balance} XOR");
         }
 
         private static async Task invoiceOwner(Message message, TelegramBotClient bot, Invoice invoice)
@@ -115,9 +115,9 @@ namespace xorWallet.Processors
 
             await bot.SendMessage(message.Chat.Id,
                 $"Это ваш счёт, вы можете его отозвать.\n" +
-                $"Вы точно хотите отозвать счёт на {invoice.Xors} xor'ов?\n\n" +
+                $"Вы точно хотите отозвать счёт на {invoice.Xors} XOR?\n\n" +
                 $"Если же не хотите отзывать, то можете поделиться чеком.\n" +
-                $"<code>https://t.me/xorwallet_bot?start=Invoice_{invoice.Id}</code>",
+                $"<code>{StartUrlGenerator.GenerateStartUrl($"Invoice_{invoice.Id}")}</code>",
                 parseMode: ParseMode.Html,
                 replyMarkup: keyboard);
         }
@@ -133,9 +133,9 @@ namespace xorWallet.Processors
             await bot.SendMessage(message.Chat.Id,
                 $"Это ваш чек, вы можете его отозвать.\n" +
                 $"Осталось активаций: {check.Activations}\n" +
-                $"Если вы сейчас отзовёте чек, то вернёте себе {check.Activations * check.Xors} xor'ов\n\n" +
+                $"Если вы сейчас отзовёте чек, то вернёте себе {check.Activations * check.Xors} XOR\n\n" +
                 $"Если же не хотите отзывать, то можете поделиться чеком.\n" +
-                $"<code>https://t.me/xorwallet_bot?start=Check_{check.Id}</code>",
+                $"<code>{StartUrlGenerator.GenerateStartUrl($"Check_{check.Id}")}</code>",
                 parseMode: ParseMode.Html,
                 replyMarkup: keyboard);
         }

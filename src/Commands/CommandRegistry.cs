@@ -16,7 +16,9 @@ namespace xorWallet.Commands
                 new Start(),
                 new Balance(),
                 new Check(),
-                new Invoice()
+                new Invoice(),
+                new MyChecks(),
+                new MyInvoices(),
                 // Add more commands here
             };
 
