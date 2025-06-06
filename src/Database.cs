@@ -12,6 +12,7 @@ namespace xorWallet
 
         private readonly IMongoCollection<User> userCollection;
         private readonly IMongoCollection<Check> checkCollection;
+        private readonly IMongoCollection<Invoice> invoiceCollection;
 
         /// <summary>
         /// Constructor that connects to the MongoDB, gets the database, and inside that database gets a collection of users
@@ -26,6 +27,7 @@ namespace xorWallet
 
             userCollection = database.GetCollection<User>("Users");
             checkCollection = database.GetCollection<Check>("Checks");
+            invoiceCollection = database.GetCollection<Invoice>("Invoices");
         }
 
         /// <summary>
@@ -57,7 +59,6 @@ namespace xorWallet
             await userCollection.InsertOneAsync(user);
         }
 
-
         /// <summary>
         /// Increments the balance of a user with that userID and ensures that wallet does not go negative.
         /// </summary>
@@ -70,7 +71,7 @@ namespace xorWallet
 
             if (user.Balance + delta < 0)
             {
-                throw new Message("User balance cannot be negative");
+                throw new Message("User balance cannot be negative. Insufficient balance.");
             }
 
             var update = Builders<User>.Update.Inc(u => u.Balance, delta);
@@ -163,6 +164,36 @@ namespace xorWallet
         public async Task RemoveCheckAsync(string? checkId)
         {
             await checkCollection.DeleteOneAsync(c => c.Id == checkId);
+        }
+
+        public async Task<string> CreateInvoiceAsync(long userId, int xors)
+        {
+            if (xors <= 0)
+            {
+                throw new Message("xors must be greater than or equal to zero");
+            }
+
+            var user = await GetUserAsync(userId);
+
+            var invoice = new Invoice()
+            {
+                Id = IdGenerator.GenerateId(),
+                InvoiceOwnerUid = user.UserId,
+                Xors = xors,
+            };
+
+            await invoiceCollection.InsertOneAsync(invoice);
+            return $"Invoice_{invoice.Id}";
+        }
+
+        public async Task<Invoice?> GetInvoiceAsync(string? invoiceId)
+        {
+            return await invoiceCollection.Find(invoice => invoice.Id == invoiceId).FirstOrDefaultAsync();
+        }
+
+        public async Task RemoveInvoiceAsync(string? invoiceId)
+        {
+            await invoiceCollection.DeleteOneAsync(c => c.Id == invoiceId);
         }
     }
 }

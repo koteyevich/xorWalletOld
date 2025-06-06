@@ -34,6 +34,23 @@ namespace xorWallet.Processors
                         }
                     }
 
+                    if (args[1].StartsWith("Invoice_"))
+                    {
+                        var database = new Database();
+
+                        string invoiceId = args[1].Replace("Invoice_", "");
+                        var invoice = await database.GetInvoiceAsync(invoiceId);
+
+                        if (invoice != null)
+                        {
+                            await invoiceActivation(message, bot, invoice);
+                        }
+                        else
+                        {
+                            throw new Exceptions.Message("Invoice not found");
+                        }
+                    }
+
                     return;
                 }
 
@@ -46,6 +63,25 @@ namespace xorWallet.Processors
                     linkPreviewOptions: new LinkPreviewOptions { IsDisabled = true }
                 );
             }
+        }
+
+        private static async Task invoiceActivation(Message message, TelegramBotClient bot, Invoice invoice)
+        {
+            if (invoice.InvoiceOwnerUid == message.From?.Id)
+            {
+                await invoiceOwner(message, bot, invoice);
+                return;
+            }
+
+            var keyboard = new InlineKeyboardMarkup();
+            var acceptButton =
+                EncryptedInlineButton.InlineButton($"✅ Оплатить {invoice.Xors} xor", $"pay_Invoice_{invoice.Id}");
+            var rejectButton = EncryptedInlineButton.InlineButton("❎ Отклонить", "decline");
+
+            keyboard.AddButton(acceptButton);
+            keyboard.AddNewRow(rejectButton);
+
+            await bot.SendMessage(message.Chat.Id, $"💰 Счёт на {invoice.Xors} xor'ов", replyMarkup: keyboard);
         }
 
         private static async Task checkActivation(Message message, TelegramBotClient bot, Check check,
@@ -69,18 +105,38 @@ namespace xorWallet.Processors
             await bot.SendMessage(message.Chat.Id, $"Готово!\nНовый баланс: {user.Balance} xor'ов");
         }
 
+        private static async Task invoiceOwner(Message message, TelegramBotClient bot, Invoice invoice)
+        {
+            var keyboard = new InlineKeyboardMarkup();
+            var revokeCheckButton =
+                EncryptedInlineButton.InlineButton("⬅️ Отозвать счёт", $"revokeinvoice_{invoice.Id}");
+
+            keyboard.AddButton(revokeCheckButton);
+
+            await bot.SendMessage(message.Chat.Id,
+                $"Это ваш счёт, вы можете его отозвать.\n" +
+                $"Вы точно хотите отозвать счёт на {invoice.Xors} xor'ов?\n\n" +
+                $"Если же не хотите отзывать, то можете поделиться чеком.\n" +
+                $"<code>https://t.me/xorwallet_bot?start=Invoice_{invoice.Id}</code>",
+                parseMode: ParseMode.Html,
+                replyMarkup: keyboard);
+        }
+
         private static async Task checkOwner(Message message, TelegramBotClient bot, Check check)
         {
             var keyboard = new InlineKeyboardMarkup();
             var revokeCheckButton =
-                EncryptedInlineButton.InlineButton("Отозвать чек", $"revokecheck_{check.Id}");
+                EncryptedInlineButton.InlineButton("⬅️ Отозвать чек", $"revokecheck_{check.Id}");
 
             keyboard.AddButton(revokeCheckButton);
 
             await bot.SendMessage(message.Chat.Id,
                 $"Это ваш чек, вы можете его отозвать.\n" +
                 $"Осталось активаций: {check.Activations}\n" +
-                $"Если вы сейчас отзовёте чек, то вернёте себе {check.Activations * check.Xors} xor'ов",
+                $"Если вы сейчас отзовёте чек, то вернёте себе {check.Activations * check.Xors} xor'ов\n\n" +
+                $"Если же не хотите отзывать, то можете поделиться чеком.\n" +
+                $"<code>https://t.me/xorwallet_bot?start=Check_{check.Id}</code>",
+                parseMode: ParseMode.Html,
                 replyMarkup: keyboard);
         }
     }

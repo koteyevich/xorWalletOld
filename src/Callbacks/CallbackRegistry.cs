@@ -14,6 +14,9 @@ namespace xorWallet.Callbacks
             var callbackList = new List<ICallback>
             {
                 new RevokeCheckCallback(),
+                new RevokeInvoiceCallback(),
+                new Decline(),
+                new Pay()
             };
 
             foreach (var cb in callbackList)
