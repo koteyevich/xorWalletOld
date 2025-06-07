@@ -71,8 +71,8 @@ namespace xorWallet.Processors
 
                 await bot.SendMessage(
                     chatId: message.Chat.Id,
-                    text: "Добро пожаловать в xorWallet.\n" +
-                          "<i><u>Помните что вся валюта вымышлена и бесценна.</u></i>",
+                    text: "👋 Добро пожаловать в xorWallet.\n" +
+                          "<i><u>ℹ️ Помните что вся валюта вымышлена и бесценна.</u></i>",
                     parseMode: ParseMode.Html,
                     replyMarkup: keyboard,
                     linkPreviewOptions: new LinkPreviewOptions { IsDisabled = true }
@@ -117,7 +117,7 @@ namespace xorWallet.Processors
             await database.UpdateCheckAsync(check, message.From!.Id);
 
             var user = await database.GetUserAsync(message.From.Id);
-            await bot.SendMessage(message.Chat.Id, $"Готово!\nНовый баланс: {user.Balance} XOR");
+            await bot.SendMessage(message.Chat.Id, $"✅ Готово!\n💰 Новый баланс: {user.Balance} XOR (+ {check.Xors})");
         }
 
         private static async Task invoiceOwner(Message message, TelegramBotClient bot, Invoice invoice)
