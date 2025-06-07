@@ -2,6 +2,8 @@ using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
+using xorWallet.Utils;
 
 namespace xorWallet.Processors
 {
@@ -32,7 +34,13 @@ namespace xorWallet.Processors
             botMessage.AppendLine("Готово!");
             botMessage.AppendLine(
                 $"Поделитесь этой ссылкой для оплаты: <code>https://t.me/xorwallet_bot?start={invoice}</code>");
-            await bot.SendMessage(message.Chat.Id, botMessage.ToString(), ParseMode.Html);
+
+            var keyboard = new InlineKeyboardMarkup();
+            var qrButton = EncryptedInlineButton.InlineButton("QR", $"qr_{invoice}");
+
+            keyboard.AddButton(qrButton);
+
+            await bot.SendMessage(message.Chat.Id, botMessage.ToString(), ParseMode.Html, replyMarkup: keyboard);
         }
     }
 }

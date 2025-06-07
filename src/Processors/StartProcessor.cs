@@ -90,13 +90,13 @@ namespace xorWallet.Processors
 
             var keyboard = new InlineKeyboardMarkup();
             var acceptButton =
-                EncryptedInlineButton.InlineButton($"✅ Оплатить {invoice.Xors} xor", $"pay_Invoice_{invoice.Id}");
+                EncryptedInlineButton.InlineButton($"✅ Оплатить {invoice.Xors} XOR", $"pay_Invoice_{invoice.Id}");
             var rejectButton = EncryptedInlineButton.InlineButton("❎ Отклонить", "decline");
 
             keyboard.AddButton(acceptButton);
             keyboard.AddNewRow(rejectButton);
 
-            await bot.SendMessage(message.Chat.Id, $"💰 Счёт на {invoice.Xors} xor'ов", replyMarkup: keyboard);
+            await bot.SendMessage(message.Chat.Id, $"💰 Счёт на {invoice.Xors} XOR", replyMarkup: keyboard);
         }
 
         private static async Task checkActivation(Message message, TelegramBotClient bot, Check check,
@@ -125,8 +125,9 @@ namespace xorWallet.Processors
             var keyboard = new InlineKeyboardMarkup();
             var revokeCheckButton =
                 EncryptedInlineButton.InlineButton("⬅️ Отозвать счёт", $"revokeinvoice_{invoice.Id}");
+            var qrButton = EncryptedInlineButton.InlineButton("QR", $"qr_Invoice_{invoice.Id}");
 
-            keyboard.AddButton(revokeCheckButton);
+            keyboard.AddButtons(revokeCheckButton, qrButton);
 
             await bot.SendMessage(message.Chat.Id,
                 $"Это ваш счёт, вы можете его отозвать.\n" +
@@ -142,8 +143,9 @@ namespace xorWallet.Processors
             var keyboard = new InlineKeyboardMarkup();
             var revokeCheckButton =
                 EncryptedInlineButton.InlineButton("⬅️ Отозвать чек", $"revokecheck_{check.Id}");
+            var qrButton = EncryptedInlineButton.InlineButton("QR", $"qr_Check_{check.Id}");
 
-            keyboard.AddButton(revokeCheckButton);
+            keyboard.AddButtons(revokeCheckButton);
 
             await bot.SendMessage(message.Chat.Id,
                 $"Это ваш чек, вы можете его отозвать.\n" +
