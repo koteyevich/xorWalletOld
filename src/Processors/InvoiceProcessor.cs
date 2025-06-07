@@ -17,7 +17,7 @@ namespace xorWallet.Processors
             if (args.Length < 2)
             {
                 throw new ArgumentException(
-                    "Not enough arguments. Example usage: /invoice 10 (xors)");
+                    "Не достаточно аргументов. Пример: /invoice 10 (xors)");
             }
 
             long userId = message.From!.Id;
@@ -25,18 +25,18 @@ namespace xorWallet.Processors
 
             if (xors <= 0)
             {
-                throw new ArgumentException("Xors must be greater than zero");
+                throw new ArgumentException("XOR должны быть > 0");
             }
 
             string invoice = await db.CreateInvoiceAsync(userId, xors);
 
             var botMessage = new StringBuilder();
-            botMessage.AppendLine("Готово!");
+            botMessage.AppendLine("✅ Готово!");
             botMessage.AppendLine(
-                $"Поделитесь этой ссылкой для оплаты: <code>https://t.me/xorwallet_bot?start={invoice}</code>");
+                $"➡️ Поделитесь этой ссылкой для оплаты: <code>https://t.me/xorwallet_bot?start={invoice}</code>");
 
             var keyboard = new InlineKeyboardMarkup();
-            var qrButton = EncryptedInlineButton.InlineButton("QR", $"qr_{invoice}");
+            var qrButton = EncryptedInlineButton.InlineButton("🔳 QR", $"qr_{invoice}");
 
             keyboard.AddButton(qrButton);
 

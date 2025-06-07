@@ -17,7 +17,7 @@ namespace xorWallet.Processors
             if (args.Length < 3)
             {
                 throw new Exceptions.Message(
-                    "Not enough arguments. Example usage: /check 10 (xors) 4 (amount of activations)");
+                    "Не достаточно аргументов. Пример: /check 10 (xors) 4 (количество активаций)");
             }
 
             long userId = message.From!.Id;
@@ -26,25 +26,25 @@ namespace xorWallet.Processors
 
             if (activations <= 0)
             {
-                throw new Exceptions.Message("Activations must be greater than zero");
+                throw new Exceptions.Message("Активации должны быть > 0");
             }
 
             if (xors <= 0)
             {
-                throw new Exceptions.Message("Xors must be greater than zero");
+                throw new Exceptions.Message("XOR должны быть > 0");
             }
 
             string check = await db.CreateCheckAsync(userId, xors, activations);
             var user = await db.GetUserAsync(userId);
 
             var botMessage = new StringBuilder();
-            botMessage.AppendLine("Готово!");
+            botMessage.AppendLine("✅ Готово!");
             botMessage.AppendLine(
-                $"Поделитесь этой ссылкой для активации: <code>{StartUrlGenerator.GenerateStartUrl(check)}</code>");
-            botMessage.AppendLine($"Ваш новый баланс: {user.Balance} XOR (- {xors * activations})");
+                $"➡️ Поделитесь этой ссылкой для активации: <code>{StartUrlGenerator.GenerateStartUrl(check)}</code>");
+            botMessage.AppendLine($"💰 Ваш новый баланс: {user.Balance} XOR (- {xors * activations})");
 
             var keyboard = new InlineKeyboardMarkup();
-            var qrButton = EncryptedInlineButton.InlineButton("QR", $"qr_{check}");
+            var qrButton = EncryptedInlineButton.InlineButton("🔳 QR", $"qr_{check}");
 
             keyboard.AddButton(qrButton);
 
