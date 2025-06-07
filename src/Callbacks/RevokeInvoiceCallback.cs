@@ -24,8 +24,8 @@ namespace xorWallet.Callbacks
 
             await db.RemoveInvoiceAsync(invoiceId);
 
-            await bot.SendMessage(callbackQuery.Message!.Chat.Id, $"Готово! \n" +
-                                                                  $"Счёт {invoiceId} был отозван.");
+            await bot.SendMessage(callbackQuery.Message!.Chat.Id, $"☑️ Готово! \n" +
+                                                                  $"📊 Счёт {invoiceId} был отозван.");
         }
     }
 }

@@ -42,7 +42,7 @@ namespace xorWallet
             var user = await userCollection.Find(u => u.UserId == userId).FirstOrDefaultAsync();
             if (user == null)
             {
-                await CreateUserAsync(userId);
+                await createUserAsync(userId);
                 user = await userCollection.Find(u => u.UserId == userId).FirstOrDefaultAsync();
             }
 
@@ -54,7 +54,7 @@ namespace xorWallet
         /// </summary>
         /// <param name="userId">Telegram userID is unique for each user and can't be changed, this number is used in
         /// creating the new user.</param>
-        public async Task CreateUserAsync(long userId)
+        private async Task createUserAsync(long userId)
         {
             var user = new User { UserId = userId };
             await userCollection.InsertOneAsync(user);
@@ -145,6 +145,13 @@ namespace xorWallet
             await UpdateCheckAsync(check, userId);
         }
 
+        /// <summary>
+        /// Increments <see cref="Check"/> by -1, adds user to an array of people who activated the check,
+        /// and add XORs to the balance of that user
+        /// </summary>
+        /// <param name="check"><see cref="Check"/> object.</param>
+        /// <param name="userId">Telegram UserID is unique for each user and can't be changed. This number is used to add the user to the list of
+        /// users that have activated the check so they can't activate it again. Then increment the balance of that user by number of XORs the check gives each activation.</param>
         public async Task UpdateCheckAsync(Check check, long userId)
         {
             var update = Builders<Check>.Update
@@ -158,15 +165,26 @@ namespace xorWallet
             var updatedCheck = await GetCheckAsync(check.Id);
             if (updatedCheck is { Activations: <= 0 })
             {
-                await checkCollection.DeleteOneAsync(c => c.Id == updatedCheck.Id);
+                await RemoveCheckAsync(updatedCheck.Id);
             }
         }
 
+        /// <summary>
+        /// Deletes the check.
+        /// </summary>
+        /// <param name="checkId">Check ID used to delete the check.</param>
         public async Task RemoveCheckAsync(string? checkId)
         {
             await checkCollection.DeleteOneAsync(c => c.Id == checkId);
         }
 
+        /// <summary>
+        /// Invoice is a way to charge someone or pay for something. In this method, we create one.
+        /// </summary>
+        /// <param name="userId">Telegram UserID is a unique number that can never be changed. Here, we use it to store the owner of the check</param>
+        /// <param name="xors">The amount of XORs user has to pay (not owner)</param>
+        /// <returns>A string that can be used as /start argument. </returns>
+        /// <exception cref="Message">Used as ArgumentException.</exception>
         public async Task<string> CreateInvoiceAsync(long userId, int xors)
         {
             if (xors <= 0)
@@ -187,16 +205,30 @@ namespace xorWallet
             return $"Invoice_{invoice.Id}";
         }
 
+        /// <summary>
+        /// Gets <see cref="Invoice"/> object by Invoice ID
+        /// </summary>
+        /// <param name="invoiceId">ID that is used to get <see cref="Invoice"/> object</param>
+        /// <returns><see cref="Invoice"/> object.</returns>
         public async Task<Invoice?> GetInvoiceAsync(string? invoiceId)
         {
             return await invoiceCollection.Find(invoice => invoice.Id == invoiceId).FirstOrDefaultAsync();
         }
 
+        /// <summary>
+        /// Delete invoice by invoice ID
+        /// </summary>
+        /// <param name="invoiceId">ID of <see cref="Invoice"/> object.</param>
         public async Task RemoveInvoiceAsync(string? invoiceId)
         {
             await invoiceCollection.DeleteOneAsync(c => c.Id == invoiceId);
         }
 
+        /// <summary>
+        /// User might want to get the list of his active checks and possibly delete one.
+        /// </summary>
+        /// <param name="userId">Telegrams UserID that is used to search in a check collection for the checks user owns and are currently active.</param>
+        /// <returns><see cref="StringBuilder"/> that then can be converted to <c>string</c> later.</returns>
         public async Task<StringBuilder> ListUserChecks(long userId)
         {
             var cursor = await checkCollection.FindAsync(c => c.CheckOwnerUid == userId);
@@ -213,14 +245,18 @@ namespace xorWallet
                 foreach (var check in checks)
                 {
                     sb.AppendLine(
-                        $"• ID: {check.Id} — {check.Xors} XOR, осталось активаций: {check.Activations} <a href=\"{StartUrlGenerator.GenerateStartUrl($"Check_{check.Id}")}\">🗑</a>");
+                        $"• ID: <code>{check.Id}</code> — {check.Xors} XOR, осталось активаций: {check.Activations} <a href=\"{StartUrlGenerator.GenerateStartUrl($"Check_{check.Id}")}\">🗑</a>");
                 }
             }
 
             return sb;
         }
 
-
+        /// <summary>
+        /// User might want to get the list of his active invoices and possibly delete one.
+        /// </summary>
+        /// <param name="userId">Telegrams UserID that is used to search in an invoice collection for the invoices user owns and are currently active.</param>
+        /// <returns><see cref="StringBuilder"/> that then can be converted to <c>string</c> later.</returns>
         public async Task<StringBuilder> ListUserInvoices(long userId)
         {
             var cursor = await invoiceCollection.FindAsync(c => c.InvoiceOwnerUid == userId);
@@ -237,7 +273,7 @@ namespace xorWallet
                 foreach (var invoice in invoices)
                 {
                     sb.AppendLine(
-                        $"• ID: {invoice.Id} — {invoice.Xors} XOR <a href=\"{StartUrlGenerator.GenerateStartUrl($"Invoice_{invoice.Id}")}\">🗑</a>");
+                        $"• ID: <code>{invoice.Id}</code> — {invoice.Xors} XOR <a href=\"{StartUrlGenerator.GenerateStartUrl($"Invoice_{invoice.Id}")}\">🗑</a>");
                 }
             }
 
