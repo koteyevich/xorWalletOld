@@ -158,7 +158,7 @@ namespace xorWallet
             var updatedCheck = await GetCheckAsync(check.Id);
             if (updatedCheck is { Activations: <= 0 })
             {
-                await checkCollection.DeleteOneAsync(c => c.Id == updatedCheck.Id);
+                await RemoveCheckAsync(updatedCheck.Id);
             }
         }
 
