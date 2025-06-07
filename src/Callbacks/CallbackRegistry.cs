@@ -19,6 +19,8 @@ namespace xorWallet.Callbacks
                 new Pay(),
                 new MyChecksCallback(),
                 new MyInvoicesCallback(),
+                new CreateCheck(),
+                new CreateInvoice()
             };
 
             foreach (var cb in callbackList)
@@ -35,6 +37,12 @@ namespace xorWallet.Callbacks
         {
             if (string.IsNullOrWhiteSpace(query.Data)) return;
 
+            if (query.Data == "null")
+            {
+                await bot.AnswerCallbackQuery(query.Id);
+                return;
+            }
+
             string? decrypted = Encryption.DecryptCallback(query.Data);
             if (string.IsNullOrWhiteSpace(decrypted)) return;
 
@@ -45,12 +53,10 @@ namespace xorWallet.Callbacks
             if (callbacks.TryGetValue(key, out var handler))
             {
                 await handler.ExecuteAsync(query, bot, decrypted);
+                await bot.AnswerCallbackQuery(query.Id);
             }
             else
             {
-                if (query.Data == "null")
-                    return;
-
                 await bot.AnswerCallbackQuery(query.Id, "Неизвестная кнопка.");
             }
         }

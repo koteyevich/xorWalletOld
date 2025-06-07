@@ -14,7 +14,7 @@ namespace xorWallet.Processors
 
             if (args.Length < 3)
             {
-                throw new ArgumentException(
+                throw new Exceptions.Message(
                     "Not enough arguments. Example usage: /check 10 (xors) 4 (amount of activations)");
             }
 
@@ -24,12 +24,12 @@ namespace xorWallet.Processors
 
             if (activations <= 0)
             {
-                throw new ArgumentException("Activations must be greater than zero");
+                throw new Exceptions.Message("Activations must be greater than zero");
             }
 
             if (xors <= 0)
             {
-                throw new ArgumentException("Xors must be greater than zero");
+                throw new Exceptions.Message("Xors must be greater than zero");
             }
 
             string check = await db.CreateCheckAsync(userId, xors, activations);
