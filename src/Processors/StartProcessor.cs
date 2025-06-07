@@ -145,7 +145,7 @@ namespace xorWallet.Processors
                 EncryptedInlineButton.InlineButton("⬅️ Отозвать чек", $"revokecheck_{check.Id}");
             var qrButton = EncryptedInlineButton.InlineButton("QR", $"qr_Check_{check.Id}");
 
-            keyboard.AddButtons(revokeCheckButton);
+            keyboard.AddButtons(revokeCheckButton, qrButton);
 
             await bot.SendMessage(message.Chat.Id,
                 $"Это ваш чек, вы можете его отозвать.\n" +
