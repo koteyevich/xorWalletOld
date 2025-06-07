@@ -125,7 +125,7 @@ namespace xorWallet.Processors
             var keyboard = new InlineKeyboardMarkup();
             var revokeCheckButton =
                 EncryptedInlineButton.InlineButton("⬅️ Отозвать счёт", $"revokeinvoice_{invoice.Id}");
-            var qrButton = EncryptedInlineButton.InlineButton("QR", $"qr_Invoice_{invoice.Id}");
+            var qrButton = EncryptedInlineButton.InlineButton("🔳 QR", $"qr_Invoice_{invoice.Id}");
 
             keyboard.AddButtons(revokeCheckButton, qrButton);
 
@@ -143,7 +143,7 @@ namespace xorWallet.Processors
             var keyboard = new InlineKeyboardMarkup();
             var revokeCheckButton =
                 EncryptedInlineButton.InlineButton("⬅️ Отозвать чек", $"revokecheck_{check.Id}");
-            var qrButton = EncryptedInlineButton.InlineButton("QR", $"qr_Check_{check.Id}");
+            var qrButton = EncryptedInlineButton.InlineButton("🔳 QR", $"qr_Check_{check.Id}");
 
             keyboard.AddButtons(revokeCheckButton, qrButton);
 
