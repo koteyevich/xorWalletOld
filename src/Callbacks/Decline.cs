@@ -12,7 +12,7 @@ namespace xorWallet.Callbacks
 
         public async Task ExecuteAsync(CallbackQuery callbackQuery, TelegramBotClient bot, string data)
         {
-            await bot.EditMessageText(callbackQuery.Message!.Chat.Id, callbackQuery.Message.MessageId, "Отклонено.");
+            await bot.EditMessageText(callbackQuery.Message!.Chat.Id, callbackQuery.Message.MessageId, "❎ Отклонено.");
         }
     }
 }

@@ -1,6 +1,7 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using xorWallet.Interfaces;
+using Message = xorWallet.Exceptions.Message;
 
 namespace xorWallet.Callbacks
 {
@@ -33,18 +34,18 @@ namespace xorWallet.Callbacks
                         invoiceOwner = await database.GetUserAsync(invoice.InvoiceOwnerUid);
                         payer = await database.GetUserAsync(callbackQuery.From.Id);
                         await bot.SendMessage(invoiceOwner.UserId,
-                            $"Счёт на {invoice.Xors} XOR был оплачен пользователем {(callbackQuery.From.Username != null ? $"@{callbackQuery.From.Username}" : callbackQuery.From.Id)}!\n" +
-                            $"Ваш новый баланс: {invoiceOwner.Balance} (+ {invoice.Xors} XOR)");
+                            $"💸 Счёт на {invoice.Xors} XOR был оплачен пользователем {(callbackQuery.From.Username != null ? $"@{callbackQuery.From.Username}" : callbackQuery.From.Id)}!\n" +
+                            $"💰 Ваш новый баланс: {invoiceOwner.Balance} (+ {invoice.Xors} XOR)");
                         await bot.SendMessage(payer.UserId,
-                            $"Вы оплатили счёт на {invoice.Xors} XOR.\n" +
-                            $"Ваш новый баланс: {payer.Balance}");
+                            $"💵 Вы оплатили счёт на {invoice.Xors} XOR.\n" +
+                            $"💰 Ваш новый баланс: {payer.Balance} XOR (- {invoice.Xors})");
 
                         await database.RemoveInvoiceAsync(invoiceId);
                         await bot.DeleteMessage(callbackQuery.From.Id, callbackQuery.Message!.MessageId);
                     }
                     else
                     {
-                        throw new Exception("Invoice not found");
+                        throw new Message("Invoice not found");
                     }
 
                     break;

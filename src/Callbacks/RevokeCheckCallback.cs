@@ -26,8 +26,8 @@ namespace xorWallet.Callbacks
             await db.RemoveCheckAsync(checkId);
             var user = await db.GetUserAsync(callbackQuery.From.Id);
 
-            await bot.SendMessage(callbackQuery.Message!.Chat.Id, $"Готово! \n" +
-                                                                  $"Чек {checkId} был отозван. Ваш новый баланс: {user.Balance} XOR (+ {check.Activations * check.Xors})");
+            await bot.SendMessage(callbackQuery.Message!.Chat.Id, $"☑️ Готово! \n" +
+                                                                  $"📋 Чек {checkId} был отозван. Ваш новый баланс: {user.Balance} XOR (+ {check.Activations * check.Xors})");
         }
     }
 }
