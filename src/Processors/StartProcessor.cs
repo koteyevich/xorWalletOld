@@ -58,21 +58,21 @@ namespace xorWallet.Processors
                 var user = await db.GetUserAsync(message.From.Id);
 
                 var keyboard = new InlineKeyboardMarkup();
-                var balanceButton = new InlineKeyboardButton($"Баланс: {user.Balance} XOR", "null");
+                var balanceButton = new InlineKeyboardButton($"💰 Баланс: {user.Balance} XOR", "null");
                 keyboard.AddButton(balanceButton);
 
-                var myChecksButton = EncryptedInlineButton.InlineButton("Мои чеки", "myChecks");
-                var myInvoicesButton = EncryptedInlineButton.InlineButton("Мои счета", "myInvoices");
+                var myChecksButton = EncryptedInlineButton.InlineButton("📋 Мои чеки", "myChecks");
+                var myInvoicesButton = EncryptedInlineButton.InlineButton("📊 Мои счета", "myInvoices");
                 keyboard.AddNewRow(myChecksButton, myInvoicesButton);
 
-                var createCheckButton = EncryptedInlineButton.InlineButton("Создать чек", "createCheck");
-                var createInvoiceButton = EncryptedInlineButton.InlineButton("Создать счёт", "createInvoice");
+                var createCheckButton = EncryptedInlineButton.InlineButton("🧾 Создать чек", "createCheck");
+                var createInvoiceButton = EncryptedInlineButton.InlineButton("🧾 Создать счёт", "createInvoice");
                 keyboard.AddNewRow(createCheckButton, createInvoiceButton);
 
                 await bot.SendMessage(
                     chatId: message.Chat.Id,
                     text: "Добро пожаловать в xorWallet.\n" +
-                          "Помните что вся валюта вымышлена и бесценна.",
+                          "<i><u>Помните что вся валюта вымышлена и бесценна.</u></i>",
                     parseMode: ParseMode.Html,
                     replyMarkup: keyboard,
                     linkPreviewOptions: new LinkPreviewOptions { IsDisabled = true }
@@ -111,7 +111,7 @@ namespace xorWallet.Processors
             if (check.UserActivated.Any(uid => uid == message.From?.Id))
             {
                 throw new Exceptions.Message(
-                    "You've already activated this check! Leave some for others...");
+                    "Ты уже активировал чек! Оставь немного другим...");
             }
 
             await database.UpdateCheckAsync(check, message.From!.Id);
@@ -130,8 +130,8 @@ namespace xorWallet.Processors
             keyboard.AddButtons(revokeCheckButton, qrButton);
 
             await bot.SendMessage(message.Chat.Id,
-                $"Это ваш счёт, вы можете его отозвать.\n" +
-                $"Вы точно хотите отозвать счёт на {invoice.Xors} XOR?\n\n" +
+                $"📊 Это ваш счёт, вы можете его отозвать.\n" +
+                $"<b>Вы точно хотите отозвать счёт на {invoice.Xors} XOR?</b>\n\n" +
                 $"Если же не хотите отзывать, то можете поделиться чеком.\n" +
                 $"<code>{StartUrlGenerator.GenerateStartUrl($"Invoice_{invoice.Id}")}</code>",
                 parseMode: ParseMode.Html,
@@ -148,9 +148,9 @@ namespace xorWallet.Processors
             keyboard.AddButtons(revokeCheckButton, qrButton);
 
             await bot.SendMessage(message.Chat.Id,
-                $"Это ваш чек, вы можете его отозвать.\n" +
+                $"📋 Это ваш чек, вы можете его отозвать.\n" +
                 $"Осталось активаций: {check.Activations}\n" +
-                $"Если вы сейчас отзовёте чек, то вернёте себе {check.Activations * check.Xors} XOR\n\n" +
+                $"Если вы сейчас отзовёте чек, то вернёте себе <b>{check.Activations * check.Xors}</b> XOR\n\n" +
                 $"Если же не хотите отзывать, то можете поделиться чеком.\n" +
                 $"<code>{StartUrlGenerator.GenerateStartUrl($"Check_{check.Id}")}</code>",
                 parseMode: ParseMode.Html,
