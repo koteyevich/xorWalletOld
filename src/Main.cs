@@ -4,6 +4,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using xorWallet.Callbacks;
 using xorWallet.Commands;
+using xorWallet.Processors;
 using xorWallet.Utils;
 
 namespace xorWallet
@@ -50,6 +51,25 @@ namespace xorWallet
                 if (message.Text!.StartsWith("/"))
                 {
                     await commandRegistry?.HandleCommandAsync(message, bot!)!;
+                }
+
+                if (message.ReplyToMessage != null)
+                {
+                    string? originalText = message.ReplyToMessage.Text;
+
+                    if (originalText?.Contains("Введите количество XOR и количество активаций") == true)
+                    {
+                        var userMessage = message;
+                        userMessage.Text = $"/check {userMessage.Text}";
+                        await CheckProcessor.CheckAsync(userMessage, bot);
+                    }
+
+                    if (originalText?.Contains("Введите количество XOR (пример: 10)") == true)
+                    {
+                        var userMessage = message;
+                        userMessage.Text = $"/invoice {userMessage.Text}";
+                        await InvoiceProcessor.InvoiceAsync(userMessage, bot);
+                    }
                 }
             }
             catch (Exception ex)

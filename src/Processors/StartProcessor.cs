@@ -54,12 +54,27 @@ namespace xorWallet.Processors
                     return;
                 }
 
-                // this should be last after all the checks
+                var db = new Database();
+                var user = await db.GetUserAsync(message.From.Id);
+
+                var keyboard = new InlineKeyboardMarkup();
+                var balanceButton = new InlineKeyboardButton($"Баланс: {user.Balance} XOR", "null");
+                keyboard.AddButton(balanceButton);
+
+                var myChecksButton = EncryptedInlineButton.InlineButton("Мои чеки", "myChecks");
+                var myInvoicesButton = EncryptedInlineButton.InlineButton("Мои счета", "myInvoices");
+                keyboard.AddNewRow(myChecksButton, myInvoicesButton);
+
+                var createCheckButton = EncryptedInlineButton.InlineButton("Создать чек", "createCheck");
+                var createInvoiceButton = EncryptedInlineButton.InlineButton("Создать счёт", "createInvoice");
+                keyboard.AddNewRow(createCheckButton, createInvoiceButton);
+
                 await bot.SendMessage(
                     chatId: message.Chat.Id,
                     text: "Добро пожаловать в xorWallet.\n" +
                           "Помните что вся валюта вымышлена и бесценна.",
                     parseMode: ParseMode.Html,
+                    replyMarkup: keyboard,
                     linkPreviewOptions: new LinkPreviewOptions { IsDisabled = true }
                 );
             }
