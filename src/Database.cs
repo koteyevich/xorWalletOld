@@ -151,7 +151,7 @@ namespace xorWallet
         /// </summary>
         /// <param name="check"><see cref="Check"/> object.</param>
         /// <param name="userId">Telegram UserID is unique for each user and can't be changed. This number is used to add the user to the list of
-        /// users that have activated the check so they can't activate it again. Then increment the balance of that user by amount of XORs the check gives each activation.</param>
+        /// users that have activated the check so they can't activate it again. Then increment the balance of that user by number of XORs the check gives each activation.</param>
         public async Task UpdateCheckAsync(Check check, long userId)
         {
             var update = Builders<Check>.Update
@@ -255,7 +255,7 @@ namespace xorWallet
         /// <summary>
         /// User might want to get the list of his active invoices and possibly delete one.
         /// </summary>
-        /// <param name="userId">Telegrams UserID that is used to search in a invoice collection for the invoices user owns and are currently active.</param>
+        /// <param name="userId">Telegrams UserID that is used to search in an invoice collection for the invoices user owns and are currently active.</param>
         /// <returns><see cref="StringBuilder"/> that then can be converted to <c>string</c> later.</returns>
         public async Task<StringBuilder> ListUserInvoices(long userId)
         {
