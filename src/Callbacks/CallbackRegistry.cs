@@ -20,7 +20,8 @@ namespace xorWallet.Callbacks
                 new MyChecksCallback(),
                 new MyInvoicesCallback(),
                 new CreateCheck(),
-                new CreateInvoice()
+                new CreateInvoice(),
+                new QrCallback()
             };
 
             foreach (var cb in callbackList)

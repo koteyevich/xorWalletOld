@@ -2,6 +2,8 @@ using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
+using xorWallet.Utils;
 
 namespace xorWallet.Processors
 {
@@ -38,9 +40,15 @@ namespace xorWallet.Processors
             var botMessage = new StringBuilder();
             botMessage.AppendLine("Готово!");
             botMessage.AppendLine(
-                $"Поделитесь этой ссылкой для активации: <code>https://t.me/xorwallet_bot?start={check}</code>");
+                $"Поделитесь этой ссылкой для активации: <code>{StartUrlGenerator.GenerateStartUrl(check)}</code>");
             botMessage.AppendLine($"Ваш новый баланс: {user.Balance} XOR (- {xors * activations})");
-            await bot.SendMessage(message.Chat.Id, botMessage.ToString(), ParseMode.Html);
+
+            var keyboard = new InlineKeyboardMarkup();
+            var qrButton = EncryptedInlineButton.InlineButton("QR", $"qr_{check}");
+
+            keyboard.AddButton(qrButton);
+
+            await bot.SendMessage(message.Chat.Id, botMessage.ToString(), ParseMode.Html, replyMarkup: keyboard);
         }
     }
 }
