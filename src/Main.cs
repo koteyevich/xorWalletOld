@@ -2,6 +2,8 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InlineQueryResults;
+using Telegram.Bot.Types.ReplyMarkups;
 using xorWallet.Callbacks;
 using xorWallet.Commands;
 using xorWallet.Processors;
@@ -40,8 +42,14 @@ namespace xorWallet
                 cts?.Cancel();
             };
 
-            await Task.Delay(Timeout.Infinite, cts.Token);
-            Logger.Bot("Bot shutting down", "INFO");
+            try
+            {
+                await Task.Delay(Timeout.Infinite, cts.Token);
+            }
+            catch (Exception e)
+            {
+                Logger.Bot("Bot shutting down", "INFO");
+            }
         }
 
         private static async Task OnMessage(Message message)
@@ -80,19 +88,273 @@ namespace xorWallet
 
         private static async Task OnUpdate(Update update)
         {
-            if (update.Type == UpdateType.CallbackQuery)
+            Console.WriteLine($"Received update: {update.Type}, InlineQuery: {update.InlineQuery?.Query}");
+            switch (update.Type)
             {
-                try
+                case UpdateType.CallbackQuery:
+                    try
+                    {
+                        await callbackRegistry?.HandleCallbackAsync(update.CallbackQuery!, bot!)!;
+                    }
+                    catch (Exception ex)
+                    {
+                        await OnError(ex, update.CallbackQuery!.Message!.Chat.Id);
+                    }
+
+                    break;
+                case UpdateType.InlineQuery:
+                    Console.WriteLine($"Processing inline query: {update.InlineQuery?.Query}");
+                    await OnInlineQuery(bot, update.InlineQuery!);
+                    break;
+                case UpdateType.ChosenInlineResult:
+                    await OnChosenInlineResult(bot, update.ChosenInlineResult!);
+                    break;
+            }
+        }
+
+        private static async Task OnInlineQuery(ITelegramBotClient bot, InlineQuery query)
+        {
+            Console.WriteLine($"OnInlineQuery called: Query={query.Query}, From={query.From?.Username}, Id={query.Id}");
+            var results = new List<InlineQueryResultArticle>();
+
+            var db = new Database();
+            var user = await db.GetUserAsync(query.From.Id);
+
+
+            if (string.IsNullOrWhiteSpace(query.Query))
+            {
+                results.Add(
+                    new InlineQueryResultArticle(
+                        id: IdGenerator.GenerateId(),
+                        title: $"Ваш баланс: {user.Balance} XOR",
+                        inputMessageContent: new InputTextMessageContent($"Мой баланс: {user.Balance} XOR")
+                        {
+                            ParseMode = ParseMode.Markdown
+                        }
+                    )
+                    {
+                        Description = "Ваш текущий баланс",
+                    }
+                );
+
+                results.Add(new InlineQueryResultArticle(
+                    id: IdGenerator.GenerateId(),
+                    title: $"Помощь", new InputTextMessageContent($"Помощь"))
                 {
-                    await callbackRegistry?.HandleCallbackAsync(update.CallbackQuery!, bot!)!;
+                    Description = "@xorwallet_bot pay 15 - создать счёт, @xorwallet_bot give 5 3 - создать чек"
+                });
+            }
+
+            if (query.Query.StartsWith("pay", StringComparison.OrdinalIgnoreCase))
+            {
+                string cleanedQuery = query.Query["pay".Length..].Trim();
+
+                if (decimal.TryParse(cleanedQuery, out decimal decimalAmount))
+                {
+                    int flooredAmount = (int)Math.Floor(decimalAmount);
+                    string messageText = $"Счёт на {flooredAmount} XOR";
+                    string description = "Нажми чтобы создать счёт.";
+
+                    if (decimalAmount != flooredAmount)
+                    {
+                        description = $"⚠️ {decimalAmount} будет конвертировано в {flooredAmount}";
+                    }
+
+                    var inlineKeyboard = new InlineKeyboardMarkup(
+                        InlineKeyboardButton.WithCallbackData("⏳ Создание Счёта",
+                            $"null")
+                    );
+
+                    results.Add(
+                        new InlineQueryResultArticle(
+                            id: IdGenerator.GenerateId(),
+                            title: $"Счёт на {flooredAmount} XOR",
+                            inputMessageContent: new InputTextMessageContent(messageText)
+                            {
+                                ParseMode = ParseMode.Markdown
+                            }
+                        )
+                        {
+                            Description = description,
+                            ReplyMarkup = inlineKeyboard
+                        }
+                    );
                 }
-                catch (Exception ex)
+                else
                 {
-                    await OnError(ex, update.CallbackQuery!.Message!.Chat.Id);
+                    results.Add(
+                        new InlineQueryResultArticle(
+                            id: IdGenerator.GenerateId(),
+                            title: "Неверное количество",
+                            inputMessageContent: new InputTextMessageContent(
+                                "Неправильный формат. Попробуйте: @xorwallet_bot pay 10")
+                        )
+                        {
+                            Description = "Пожалуйста, введите корректное количество после 'pay'"
+                        }
+                    );
+                }
+            }
+
+            if (query.Query.StartsWith("give", StringComparison.OrdinalIgnoreCase))
+            {
+                string[] cleanedQuery = query.Query.Replace("give", string.Empty)
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (decimal.TryParse(cleanedQuery[0], out decimal xorAmount))
+                {
+                    decimal.TryParse(cleanedQuery[1], out decimal activationAmount);
+
+                    int flooredXorAmount = (int)Math.Floor(xorAmount);
+                    int flooredActivationAmount = (int)Math.Floor(activationAmount);
+                    string messageText = $"Чек на {flooredXorAmount} XOR ({flooredActivationAmount} акт.)";
+                    string description = "Нажми чтобы создать чек.";
+
+                    if (user.Balance < flooredXorAmount * flooredActivationAmount)
+                    {
+                        description = $"Нужно {flooredXorAmount * flooredActivationAmount} XOR для чека.";
+                    }
+
+                    if (xorAmount != flooredXorAmount)
+                    {
+                        description = $"⚠️ {xorAmount} будет конвертировано в {flooredXorAmount}\n";
+                    }
+
+                    if (activationAmount != flooredActivationAmount)
+                    {
+                        description += $"{activationAmount} будет конвертировано в {flooredActivationAmount}\n";
+                    }
+
+                    var inlineKeyboard = new InlineKeyboardMarkup(
+                        InlineKeyboardButton.WithCallbackData("⏳ Создание Чека",
+                            $"null")
+                    );
+
+                    if (user.Balance < flooredXorAmount * flooredActivationAmount)
+                    {
+                        results.Add(
+                            new InlineQueryResultArticle(
+                                id: IdGenerator.GenerateId(),
+                                title: "Недостаточно XOR.",
+                                inputMessageContent: new InputTextMessageContent(
+                                    $"Недостаточно XOR.\nВы создаёте чек на: {flooredXorAmount * flooredActivationAmount} ({flooredXorAmount} * {flooredActivationAmount})\nВаш баланс: {user.Balance}")
+                            )
+                            {
+                                Description = description,
+                            }
+                        );
+                    }
+                    else
+                    {
+                        results.Add(
+                            new InlineQueryResultArticle(
+                                id: IdGenerator.GenerateId(),
+                                title: $"Чек на {flooredXorAmount} XOR ({activationAmount} активаций)",
+                                inputMessageContent: new InputTextMessageContent(messageText)
+                                {
+                                    ParseMode = ParseMode.Markdown
+                                }
+                            )
+                            {
+                                Description = description,
+                                ReplyMarkup = inlineKeyboard
+                            }
+                        );
+                    }
+                }
+                else
+                {
+                    results.Add(
+                        new InlineQueryResultArticle(
+                            id: IdGenerator.GenerateId(),
+                            title: "Неверное количество",
+                            inputMessageContent: new InputTextMessageContent(
+                                "Неправильный формат. Попробуйте: @xorwallet_bot give 3 5")
+                        )
+                        {
+                            Description = "Пожалуйста, введите корректное количество после 'give'"
+                        }
+                    );
+                }
+            }
+
+            try
+            {
+                await bot.AnswerInlineQuery(query.Id, results, isPersonal: true, cacheTime: 0);
+            }
+            catch (Telegram.Bot.Exceptions.ApiRequestException ex) when (ex.ErrorCode == 429)
+            {
+                int retryAfter = ex.Parameters?.RetryAfter ?? 1;
+                Logger.Warn($"Rate limit hit, retrying after {retryAfter} seconds");
+                await Task.Delay(retryAfter * 1000);
+                await bot.AnswerInlineQuery(query.Id, results, isPersonal: true);
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn($"Error in OnInlineQuery: {ex.Message}\nStackTrace: {ex.StackTrace}");
+                // Handle network errors
+                if (ex is HttpRequestException || ex is System.Net.Sockets.SocketException)
+                {
+                    Logger.Warn("Network error detected, retrying in 5 seconds");
+                    await Task.Delay(5000);
+                    await bot.AnswerInlineQuery(query.Id, results, isPersonal: true);
                 }
             }
         }
 
+        private static async Task OnChosenInlineResult(ITelegramBotClient bot, ChosenInlineResult chosenResult)
+        {
+            Console.WriteLine(
+                $"User {chosenResult.From.Username} chose result: {chosenResult.ResultId}, Query: {chosenResult.Query}");
+
+            if (chosenResult.Query.StartsWith("pay", StringComparison.OrdinalIgnoreCase))
+            {
+                string cleanedQuery = chosenResult.Query["pay".Length..].Trim();
+                if (decimal.TryParse(cleanedQuery, out decimal decimalAmount))
+                {
+                    int flooredAmount = (int)Math.Floor(decimalAmount);
+                    var db = new Database();
+
+                    string invoiceId = await db.CreateInvoiceAsync(chosenResult.From.Id, flooredAmount);
+
+                    var updatedKeyboard = new InlineKeyboardMarkup(
+                        InlineKeyboardButton.WithUrl("💰 Оплатить счёт",
+                            $"{StartUrlGenerator.GenerateStartUrl(invoiceId)}")
+                    );
+
+                    await bot.EditMessageReplyMarkup(
+                        inlineMessageId: chosenResult.InlineMessageId,
+                        replyMarkup: updatedKeyboard
+                    );
+                }
+            }
+
+            if (chosenResult.Query.StartsWith("give", StringComparison.OrdinalIgnoreCase))
+            {
+                string[] cleanedQuery = chosenResult.Query.Replace("give", string.Empty)
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (decimal.TryParse(cleanedQuery[0], out decimal decimalXor))
+                {
+                    decimal.TryParse(cleanedQuery[1], out decimal activationAmount);
+
+                    int flooredAmount = (int)Math.Floor(decimalXor);
+                    int flooredActivationAmount = (int)Math.Floor(activationAmount);
+                    var db = new Database();
+
+                    string checkId =
+                        await db.CreateCheckAsync(chosenResult.From.Id, flooredAmount, flooredActivationAmount);
+
+                    var updatedKeyboard = new InlineKeyboardMarkup(
+                        InlineKeyboardButton.WithUrl("💰 Активировать чек",
+                            $"{StartUrlGenerator.GenerateStartUrl(checkId)}")
+                    );
+
+                    await bot.EditMessageReplyMarkup(
+                        inlineMessageId: chosenResult.InlineMessageId,
+                        replyMarkup: updatedKeyboard
+                    );
+                }
+            }
+        }
 
         // this here is where your creativity can shine.
         // i chose to send the message that something wrong happened, and send a detailed report in my chat.
