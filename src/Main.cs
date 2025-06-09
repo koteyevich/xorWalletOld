@@ -141,7 +141,7 @@ namespace xorWallet
                     id: IdGenerator.GenerateId(),
                     title: $"Помощь", new InputTextMessageContent($"Помощь"))
                 {
-                    Description = "pay - создать счёт, give - создать чек"
+                    Description = "@xorwallet_bot pay 15 - создать счёт, @xorwallet_bot give 5 3 - создать чек"
                 });
             }
 
@@ -235,12 +235,8 @@ namespace xorWallet
                             new InlineQueryResultArticle(
                                 id: IdGenerator.GenerateId(),
                                 title: "Недостаточно XOR.",
-                                inputMessageContent: new InputTextMessageContent($"Недостаточно XOR.\n" +
-                                    $"Вы создаёте чек на: {flooredXorAmount * flooredActivationAmount} ({flooredXorAmount} * {flooredActivationAmount})" +
-                                    $"Ваш баланс: {user.Balance}")
-                                {
-                                    ParseMode = ParseMode.Markdown
-                                }
+                                inputMessageContent: new InputTextMessageContent(
+                                    $"Недостаточно XOR.\nВы создаёте чек на: {flooredXorAmount * flooredActivationAmount} ({flooredXorAmount} * {flooredActivationAmount})\nВаш баланс: {user.Balance}")
                             )
                             {
                                 Description = description,
@@ -283,7 +279,7 @@ namespace xorWallet
 
             try
             {
-                await bot.AnswerInlineQuery(query.Id, results, isPersonal: true);
+                await bot.AnswerInlineQuery(query.Id, results, isPersonal: true, cacheTime: 0);
             }
             catch (Telegram.Bot.Exceptions.ApiRequestException ex) when (ex.ErrorCode == 429)
             {

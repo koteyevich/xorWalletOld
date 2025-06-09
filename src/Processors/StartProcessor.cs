@@ -72,7 +72,8 @@ namespace xorWallet.Processors
                 await bot.SendMessage(
                     chatId: message.Chat.Id,
                     text: "👋 Добро пожаловать в xorWallet.\n" +
-                          "<i><u>ℹ️ Помните что вся валюта вымышлена и бесценна.</u></i>",
+                          "<i><u>ℹ️ Помните что вся валюта вымышлена и бесценна.</u></i>\n" +
+                          "<i>Бот поддерживает inline!</i>",
                     parseMode: ParseMode.Html,
                     replyMarkup: keyboard,
                     linkPreviewOptions: new LinkPreviewOptions { IsDisabled = true }
