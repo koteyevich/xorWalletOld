@@ -61,6 +61,37 @@ namespace xorWallet
         {
             try
             {
+                if (message.SuccessfulPayment != null)
+                {
+                    Dictionary<string, int> stars = new Dictionary<string, int>
+                    {
+                        { "purchase-15-xor", 10 },
+                        { "purchase-30-xor", 20 },
+                        { "purchase-50-xor", 35 }
+                    };
+
+                    Dictionary<string, int> xors = new Dictionary<string, int>
+                    {
+                        { "purchase-15-xor", 15 },
+                        { "purchase-30-xor", 30 },
+                        { "purchase-50-xor", 50 }
+                    };
+
+                    string payload = message.SuccessfulPayment.InvoicePayload;
+
+                    if (!stars.ContainsKey(payload) || !xors.TryGetValue(payload, out int xor))
+                    {
+                        throw new Exception($"Invalid invoice payload: {payload}");
+                    }
+
+                    await bot.SendMessage(message.Chat.Id,
+                        $"Спасибо за оплату {stars[payload]} звёзд! {xor} XOR были зачислены на ваш кошелёк.");
+
+                    var db = new Database();
+
+                    await db.UpdateBalanceAsync(message.From.Id, xors[payload]);
+                }
+
                 if (message.Text == null)
                 {
                     return;
