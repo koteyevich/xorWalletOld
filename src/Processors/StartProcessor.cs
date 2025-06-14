@@ -61,6 +61,9 @@ namespace xorWallet.Processors
                 var balanceButton = new InlineKeyboardButton($"💰 Баланс: {user.Balance} XOR", "null");
                 keyboard.AddButton(balanceButton);
 
+                var starsDepositButton = EncryptedInlineButton.InlineButton("⭐️ Пополнить счёт", "depositStars");
+                keyboard.AddNewRow(starsDepositButton);
+
                 var myChecksButton = EncryptedInlineButton.InlineButton("📋 Мои чеки", "myChecks");
                 var myInvoicesButton = EncryptedInlineButton.InlineButton("📊 Мои счета", "myInvoices");
                 keyboard.AddNewRow(myChecksButton, myInvoicesButton);

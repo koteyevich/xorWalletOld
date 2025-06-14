@@ -21,7 +21,8 @@ namespace xorWallet.Callbacks
                 new MyInvoicesCallback(),
                 new CreateCheck(),
                 new CreateInvoice(),
-                new QrCallback()
+                new QrCallback(),
+                new DepositStarsCallback()
             };
 
             foreach (var cb in callbackList)

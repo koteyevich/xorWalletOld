@@ -24,7 +24,12 @@ namespace xorWallet
             Logger.Bot("Bot starting", "INFO");
 
             cts = new CancellationTokenSource();
-            bot = new TelegramBotClient(Secrets.TOKEN);
+            //bot = new TelegramBotClient(Secrets.TOKEN); // production
+
+            bot = new TelegramBotClient(new TelegramBotClientOptions(Secrets.TOKEN,
+                useTestEnvironment: true)); // test server
+
+
             var me = await bot.GetMe();
 
             Logger.Bot($"Bot connected as @{me.Username}", "SUCCESS");
@@ -56,6 +61,43 @@ namespace xorWallet
         {
             try
             {
+                if (message.SuccessfulPayment != null)
+                {
+                    Dictionary<string, int> stars = new Dictionary<string, int>
+                    {
+                        { "purchase-15-xor", 10 },
+                        { "purchase-30-xor", 20 },
+                        { "purchase-50-xor", 35 }
+                    };
+
+                    Dictionary<string, int> xors = new Dictionary<string, int>
+                    {
+                        { "purchase-15-xor", 15 },
+                        { "purchase-30-xor", 30 },
+                        { "purchase-50-xor", 50 }
+                    };
+
+                    string payload = message.SuccessfulPayment.InvoicePayload;
+
+                    if (!stars.ContainsKey(payload) || !xors.TryGetValue(payload, out int xor))
+                    {
+                        throw new Exception($"Invalid invoice payload: {payload}");
+                    }
+
+                    await bot.SendMessage(message.Chat.Id,
+                        $"🙏 Спасибо за оплату {stars[payload]} звёзд! \n" +
+                        $"💰 {xor} XOR были зачислены на ваш кошелёк.");
+
+                    var db = new Database();
+
+                    await db.UpdateBalanceAsync(message.From.Id, xors[payload]);
+                }
+
+                if (message.Text == null)
+                {
+                    return;
+                }
+
                 if (message.Text!.StartsWith("/"))
                 {
                     await commandRegistry?.HandleCommandAsync(message, bot!)!;
@@ -108,6 +150,9 @@ namespace xorWallet
                     break;
                 case UpdateType.ChosenInlineResult:
                     await OnChosenInlineResult(bot, update.ChosenInlineResult!);
+                    break;
+                case UpdateType.PreCheckoutQuery:
+                    await bot.AnswerPreCheckoutQuery(update.PreCheckoutQuery.Id);
                     break;
             }
         }
