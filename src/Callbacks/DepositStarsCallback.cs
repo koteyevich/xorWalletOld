@@ -1,5 +1,6 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
 using xorWallet.Interfaces;
@@ -20,27 +21,30 @@ namespace xorWallet.Callbacks
                 case "depositStars":
                     var keyboard = new InlineKeyboardMarkup();
 
-                    var buttonPay15 = EncryptedInlineButton.InlineButton("15 ⭐️️", "depositStars15");
+                    var buttonPay15 = EncryptedInlineButton.InlineButton("15 XOR️️ (10 XTR)", "depositStars15");
                     buttonPay15.Pay = true;
-                    var buttonPay30 = EncryptedInlineButton.InlineButton("30 ⭐️️", "depositStars30");
+                    var buttonPay30 = EncryptedInlineButton.InlineButton("30 XOR (20 XTR)", "depositStars30");
                     buttonPay30.Pay = true;
-                    var buttonPay50 = EncryptedInlineButton.InlineButton("50 ⭐️️", "depositStars50");
+                    var buttonPay50 = EncryptedInlineButton.InlineButton("50 XOR (35 XTR)", "depositStars50");
                     buttonPay50.Pay = true;
 
                     keyboard.AddButtons(buttonPay15, buttonPay30, buttonPay50);
-                    await bot.SendMessage(callbackQuery.Message.Chat.Id, "выбери", replyMarkup: keyboard);
+                    await bot.SendMessage(callbackQuery.Message.Chat.Id, "Выберите сумму пополнения. \n" +
+                                                                         "⚠️ <b>ВАЖНО:</b> <i>XOR — это внутренняя валюта бота, которая НЕ <b>ИМЕЕТ РЕАЛЬНОЙ ЦЕННОСТИ</b>. Пополнение счёта является исключительно добровольным пожертвованием. <b>Вы НЕ сможете вывести деньги или обменять XOR на реальные средства.</b> Пополняя счёт, вы соглашаетесь с этими условиями.</i>",
+                        parseMode: ParseMode.Html,
+                        replyMarkup: keyboard);
                     break;
                 case "depositStars15":
                     await bot.SendInvoice(
                         chatId: callbackQuery.Message.Chat.Id,
                         title: "Купить 15 XOR",
-                        description: "Покупка 15 XOR за 15 звёзд",
+                        description: "Покупка 15 XOR за 10 звёзд",
                         payload: "purchase-15-xor",
                         currency: "XTR",
                         prices: new List<LabeledPrice>
                         {
-                            new("15 XOR (15 ⭐️)",
-                                15),
+                            new("15 XOR (10 ⭐️)",
+                                10),
                         }
                     );
                     break;
@@ -48,13 +52,13 @@ namespace xorWallet.Callbacks
                     await bot.SendInvoice(
                         chatId: callbackQuery.Message.Chat.Id,
                         title: "Купить 30 XOR",
-                        description: "Покупка 30 XOR за 30 звёзд",
+                        description: "Покупка 30 XOR за 20 звёзд",
                         payload: "purchase-30-xor",
                         currency: "XTR",
                         prices: new List<LabeledPrice>
                         {
-                            new("30 XOR (30 ⭐️)",
-                                30),
+                            new("30 XOR (20 ⭐️)",
+                                20),
                         }
                     );
                     break;
@@ -62,13 +66,13 @@ namespace xorWallet.Callbacks
                     await bot.SendInvoice(
                         chatId: callbackQuery.Message.Chat.Id,
                         title: "Купить 50 XOR",
-                        description: "Покупка 50 XOR за 50 звёзд",
+                        description: "Покупка 50 XOR за 35 звёзд",
                         payload: "purchase-50-xor",
                         currency: "XTR",
                         prices: new List<LabeledPrice>
                         {
-                            new("50 XOR (50 ⭐️)",
-                                50),
+                            new("50 XOR (35 ⭐️)",
+                                35),
                         }
                     );
                     break;
