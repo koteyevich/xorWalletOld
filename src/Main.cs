@@ -61,6 +61,11 @@ namespace xorWallet
         {
             try
             {
+                if (message.Text == null)
+                {
+                    return;
+                }
+
                 if (message.Text!.StartsWith("/"))
                 {
                     await commandRegistry?.HandleCommandAsync(message, bot!)!;
@@ -113,6 +118,9 @@ namespace xorWallet
                     break;
                 case UpdateType.ChosenInlineResult:
                     await OnChosenInlineResult(bot, update.ChosenInlineResult!);
+                    break;
+                case UpdateType.PreCheckoutQuery:
+                    await bot.AnswerPreCheckoutQuery(update.PreCheckoutQuery.Id);
                     break;
             }
         }
