@@ -1,5 +1,6 @@
 # xorWallet
 
+![banner.png](assets/banner.png 'image banner, it reads "xorWallet"')
 > *"Exclusive or" is a logical operator whose negation is the logical
 biconditional.* \- [Wikipedia](https://en.wikipedia.org/wiki/Exclusive_or)
 
