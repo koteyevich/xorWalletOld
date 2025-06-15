@@ -1,5 +1,5 @@
 # xorWallet
-
+![banner.png](assets/banner.png)
 > *"Exclusive or" is a logical operator whose negation is the logical
 biconditional.* \- [Wikipedia](https://en.wikipedia.org/wiki/Exclusive_or)
 
