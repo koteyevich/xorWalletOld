@@ -15,7 +15,25 @@ You want your own xorWallet? Follow these instructions to be set up.
 2. Open the project in the IDE of your preference.
 3. Run `dotnet restore` (or IDE might do it for you)
 4. In `src` folder, create `Secrets.cs` file.
-    1. In there, create `public const string` `TOKEN`, `DB_USERNAME`, `DB_PASSWORD`, `CALLBACK_SALT`
+    1. In there, create
+       ```
+       public enum Server
+       {
+           Test,
+           Production
+       }
+       public static class Secrets
+       {
+           public const string PRODUCTION_TOKEN = "";
+           public const string TEST_TOKEN = ""; 
+           public const Server SERVER = Server.Production;
+
+           public const string DB_USERNAME = "";
+           public const string DB_PASSWORD = "";
+
+           public const string CALLBACK_SALT = "";
+       }
+       ```
     2. Fill out these fields.
 
 > [!WARNING]
