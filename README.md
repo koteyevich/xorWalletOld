@@ -3,7 +3,13 @@
 > *"Exclusive or" is a logical operator whose negation is the logical
 biconditional.* \- [Wikipedia](https://en.wikipedia.org/wiki/Exclusive_or)
 
-xorWallet is a C# Telegram Bot.
+xorWallet is a C# Telegram Bot Wallet that has its own currency **that has no value** - XOR.\
+\
+Bot offers checks, invoices, buying its currency, QR codes.
+
+> [!CAUTION]
+> XOR — is the bot's internal currency, which has **NO REAL VALUE**. Funding your account is a voluntary donation only.
+**You will NOT be able to withdraw money or exchange XOR for real money.**
 
 # Running own xorWallet
 
@@ -47,7 +53,7 @@ The database used is **MongoDB**. I recommend you to set up a docker container w
 > If you plan on changing the port, you need to change the port in Database.cs `connectionString`
 
 After the container is created, you will need to create a database named `xorWallet`, inside it, you need to create a
-collection named `Users`
+collections named `Users`, `Checks`, `Invoices`.
 > [!WARNING]
 > Names are case-sensitive.
 
