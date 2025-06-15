@@ -8,7 +8,7 @@ xorWallet is a C# Telegram Bot Wallet that has its own currency **that has no va
 Bot offers checks, invoices, buying its currency, QR codes.
 
 > [!CAUTION]
-> XOR — is the bot's internal currency, which has **NO REAL VALUE**. Funding your account is a voluntary donation only.
+> XOR — bot's internal currency, which has **NO REAL VALUE**. Funding your account is a voluntary donation only.
 **You will NOT be able to withdraw money or exchange XOR for real money.**
 
 # Running own xorWallet
