@@ -16,6 +16,7 @@ namespace xorWallet.Callbacks
 
         public async Task ExecuteAsync(CallbackQuery callbackQuery, TelegramBotClient bot, string data)
         {
+            // yanderedev ahh code
             switch (data)
             {
                 case "depositStars":

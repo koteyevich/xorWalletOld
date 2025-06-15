@@ -9,6 +9,14 @@ namespace xorWallet.Processors
 {
     public abstract class CheckProcessor
     {
+        /// <summary>
+        /// Command that is used to generate checks. Checks need 2 things: number of XORs, and number of activations.
+        /// If those parameters are given and correct, generate the check.
+        /// After the creation on the backend, the message about success is sent.
+        /// </summary>
+        /// <param name="message">Used to get the userID and chatID. Also used to get the message text to split it into arguments that are used when creating the check.</param>
+        /// <param name="bot">Used for sending messages.</param>
+        /// <exception cref="Message">(can't reference the correct message...) If the arguments are incorrect.</exception>
         public static async Task CheckAsync(Message message, TelegramBotClient bot)
         {
             var db = new Database();

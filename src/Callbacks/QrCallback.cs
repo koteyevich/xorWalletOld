@@ -25,6 +25,7 @@ namespace xorWallet.Callbacks
             BitmapByteQRCode qrCode = new BitmapByteQRCode(qrCodeData);
             byte[] qrCodeString = qrCode.GetGraphic(5);
 
+            //! memory stream is not the best way of doing this... but i think i can get away with it because the image is like ~350x350x
             using var ms = new MemoryStream(qrCodeString);
             await bot.SendPhoto(callbackQuery.Message!.Chat.Id, InputFile.FromStream(ms));
         }

@@ -20,17 +20,21 @@ namespace xorWallet.Callbacks
                 case "Invoice":
                     var database = new Database();
 
+                    // get the invoice
                     string invoiceId = splitData[2];
                     var invoice = await database.GetInvoiceAsync(invoiceId);
 
                     if (invoice != null)
                     {
+                        // get the users
                         var invoiceOwner = await database.GetUserAsync(invoice.InvoiceOwnerUid);
                         var payer = await database.GetUserAsync(callbackQuery.From.Id);
 
+                        // update their balance
                         await database.UpdateBalanceAsync(payer.UserId, -invoice.Xors);
                         await database.UpdateBalanceAsync(invoiceOwner.UserId, invoice.Xors);
 
+                        // cute little message that tells the owner that their invoice was paid, and tells the payer that he paid that invoice
                         invoiceOwner = await database.GetUserAsync(invoice.InvoiceOwnerUid);
                         payer = await database.GetUserAsync(callbackQuery.From.Id);
                         await bot.SendMessage(invoiceOwner.UserId,
