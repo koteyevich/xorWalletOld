@@ -11,7 +11,7 @@ namespace xorWallet.Processors
             var database = new Database();
             await bot.SendMessage(
                 message.Chat.Id,
-                (await database.ListUserInvoices(message.From.Id)).ToString(),
+                (await database.ListUserInvoices(message.From!.Id)).ToString(),
                 ParseMode.Html
             );
         }

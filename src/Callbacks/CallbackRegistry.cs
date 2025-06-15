@@ -35,6 +35,12 @@ namespace xorWallet.Callbacks
             }
         }
 
+        /// <summary>
+        /// Decrypts the callback, then tries to match with the <see cref="callbacks"/>.
+        /// <c>null</c> callback is used for buttons that display text, but have no function.
+        /// </summary>
+        /// <param name="query">Used to get the query data</param>
+        /// <param name="bot">Used to answer the queries</param>
         public async Task HandleCallbackAsync(CallbackQuery query, TelegramBotClient bot)
         {
             if (string.IsNullOrWhiteSpace(query.Data)) return;

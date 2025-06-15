@@ -134,6 +134,7 @@ namespace xorWallet
             return await checkCollection.Find(check => check.Id == checkId).FirstOrDefaultAsync();
         }
 
+        // overload to the function lower
         public async Task UpdateCheckAsync(string? checkId, long userId)
         {
             var check = await GetCheckAsync(checkId);

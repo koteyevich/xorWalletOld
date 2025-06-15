@@ -9,6 +9,14 @@ namespace xorWallet.Processors
 {
     public abstract class InvoiceProcessor
     {
+        /// <summary>
+        /// Command that is used to generate invoices. Invoices need 1 thing: number of XORs.
+        /// If those parameters are given and correct, generate the invoice.
+        /// After the creation on the backend, send a message about success.
+        /// </summary>
+        /// <param name="message">Used to get the userID and chatID. Also used to get the message text to split it into arguments that are used when creating the invoice.</param>
+        /// <param name="bot">Used for sending messages.</param>
+        /// <exception cref="Message">(can't reference the correct message...) if the arguments are incorrect.</exception>
         public static async Task InvoiceAsync(Message message, TelegramBotClient bot)
         {
             var db = new Database();
@@ -16,7 +24,7 @@ namespace xorWallet.Processors
 
             if (args.Length < 2)
             {
-                throw new ArgumentException(
+                throw new Exceptions.Message(
                     "Не достаточно аргументов. Пример: /invoice 10 (xors)");
             }
 
@@ -25,7 +33,7 @@ namespace xorWallet.Processors
 
             if (xors <= 0)
             {
-                throw new ArgumentException("XOR должны быть > 0");
+                throw new Exceptions.Message("XOR должны быть > 0");
             }
 
             string invoice = await db.CreateInvoiceAsync(userId, xors);

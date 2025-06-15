@@ -51,7 +51,7 @@ namespace xorWallet
             {
                 await Task.Delay(Timeout.Infinite, cts.Token);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Logger.Bot("Bot shutting down", "INFO");
             }
@@ -84,13 +84,13 @@ namespace xorWallet
                         throw new Exception($"Invalid invoice payload: {payload}");
                     }
 
-                    await bot.SendMessage(message.Chat.Id,
+                    await bot!.SendMessage(message.Chat.Id,
                         $"🙏 Спасибо за оплату {stars[payload]} звёзд! \n" +
                         $"💰 {xor} XOR были зачислены на ваш кошелёк.");
 
                     var db = new Database();
 
-                    await db.UpdateBalanceAsync(message.From.Id, xors[payload]);
+                    await db.UpdateBalanceAsync(message.From!.Id, xors[payload]);
                 }
 
                 if (message.Text == null)
@@ -111,14 +111,14 @@ namespace xorWallet
                     {
                         var userMessage = message;
                         userMessage.Text = $"/check {userMessage.Text}";
-                        await CheckProcessor.CheckAsync(userMessage, bot);
+                        await CheckProcessor.CheckAsync(userMessage, bot!);
                     }
 
                     if (originalText?.Contains("Введите количество XOR (пример: 10)") == true)
                     {
                         var userMessage = message;
                         userMessage.Text = $"/invoice {userMessage.Text}";
-                        await InvoiceProcessor.InvoiceAsync(userMessage, bot);
+                        await InvoiceProcessor.InvoiceAsync(userMessage, bot!);
                     }
                 }
             }
@@ -146,20 +146,20 @@ namespace xorWallet
                     break;
                 case UpdateType.InlineQuery:
                     Console.WriteLine($"Processing inline query: {update.InlineQuery?.Query}");
-                    await OnInlineQuery(bot, update.InlineQuery!);
+                    await OnInlineQuery(bot!, update.InlineQuery!);
                     break;
                 case UpdateType.ChosenInlineResult:
-                    await OnChosenInlineResult(bot, update.ChosenInlineResult!);
+                    await OnChosenInlineResult(bot!, update.ChosenInlineResult!);
                     break;
                 case UpdateType.PreCheckoutQuery:
-                    await bot.AnswerPreCheckoutQuery(update.PreCheckoutQuery.Id);
+                    await bot!.AnswerPreCheckoutQuery(update.PreCheckoutQuery!.Id);
                     break;
             }
         }
 
-        private static async Task OnInlineQuery(ITelegramBotClient bot, InlineQuery query)
+        private static async Task OnInlineQuery(ITelegramBotClient botClient, InlineQuery query)
         {
-            Console.WriteLine($"OnInlineQuery called: Query={query.Query}, From={query.From?.Username}, Id={query.Id}");
+            Console.WriteLine($"OnInlineQuery called: Query={query.Query}, From={query.From.Username}, Id={query.Id}");
             var results = new List<InlineQueryResultArticle>();
 
             var db = new Database();
@@ -324,14 +324,14 @@ namespace xorWallet
 
             try
             {
-                await bot.AnswerInlineQuery(query.Id, results, isPersonal: true, cacheTime: 0);
+                await botClient.AnswerInlineQuery(query.Id, results, isPersonal: true, cacheTime: 0);
             }
             catch (Telegram.Bot.Exceptions.ApiRequestException ex) when (ex.ErrorCode == 429)
             {
                 int retryAfter = ex.Parameters?.RetryAfter ?? 1;
                 Logger.Warn($"Rate limit hit, retrying after {retryAfter} seconds");
                 await Task.Delay(retryAfter * 1000);
-                await bot.AnswerInlineQuery(query.Id, results, isPersonal: true);
+                await botClient.AnswerInlineQuery(query.Id, results, isPersonal: true);
             }
             catch (Exception ex)
             {
@@ -341,12 +341,12 @@ namespace xorWallet
                 {
                     Logger.Warn("Network error detected, retrying in 5 seconds");
                     await Task.Delay(5000);
-                    await bot.AnswerInlineQuery(query.Id, results, isPersonal: true);
+                    await botClient.AnswerInlineQuery(query.Id, results, isPersonal: true);
                 }
             }
         }
 
-        private static async Task OnChosenInlineResult(ITelegramBotClient bot, ChosenInlineResult chosenResult)
+        private static async Task OnChosenInlineResult(ITelegramBotClient botClient, ChosenInlineResult chosenResult)
         {
             Console.WriteLine(
                 $"User {chosenResult.From.Username} chose result: {chosenResult.ResultId}, Query: {chosenResult.Query}");
@@ -366,8 +366,8 @@ namespace xorWallet
                             $"{StartUrlGenerator.GenerateStartUrl(invoiceId)}")
                     );
 
-                    await bot.EditMessageReplyMarkup(
-                        inlineMessageId: chosenResult.InlineMessageId,
+                    await botClient.EditMessageReplyMarkup(
+                        inlineMessageId: chosenResult.InlineMessageId!,
                         replyMarkup: updatedKeyboard
                     );
                 }
@@ -393,8 +393,8 @@ namespace xorWallet
                             $"{StartUrlGenerator.GenerateStartUrl(checkId)}")
                     );
 
-                    await bot.EditMessageReplyMarkup(
-                        inlineMessageId: chosenResult.InlineMessageId,
+                    await botClient.EditMessageReplyMarkup(
+                        inlineMessageId: chosenResult.InlineMessageId!,
                         replyMarkup: updatedKeyboard
                     );
                 }
@@ -402,19 +402,21 @@ namespace xorWallet
         }
 
         // this here is where your creativity can shine.
-        // i chose to send the message that something wrong happened, and send a detailed report in my chat.
+        // I chose to send the message that something wrong happened, and send a detailed report in my chat.
         private static async Task OnError(Exception exception, long chatId)
         {
             if (exception is Exceptions.Message)
             {
                 await bot!.SendMessage(chatId,
-                    $"<b>Ах!</b> <i>Что-то пошло не так...</i>\n<blockquote expandable><i>{exception.Message}</i></blockquote>",
+                    $"<b>Ах!</b> <i>Что-то пошло не так...</i>\n" +
+                    $"<blockquote expandable><i>{exception.Message}</i></blockquote>",
                     ParseMode.Html);
                 return;
             }
 
             await bot!.SendMessage(chatId,
-                $"<b>Ах!</b> <i>Что-то пошло не так...</i> Проблема была автоматически передана разработчикам.\n<blockquote expandable><i>{exception.Message}</i></blockquote>",
+                $"<b>Ах!</b> <i>Что-то пошло не так...</i> Проблема была автоматически передана разработчикам.\n" +
+                $"<blockquote expandable><i>{exception.Message}</i></blockquote>",
                 ParseMode.Html);
 
             var errorReport = new StringBuilder();
