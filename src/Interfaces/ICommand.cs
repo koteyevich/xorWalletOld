@@ -10,7 +10,6 @@ namespace xorWallet.Interfaces
         string Description { get; }
         string[] Aliases { get; }
         Task ExecuteAsync(Message message, TelegramBotClient bot);
-        bool RequiresAdmin { get; }
     }
 
     public abstract class CommandBase : ICommand
@@ -18,7 +17,6 @@ namespace xorWallet.Interfaces
         public abstract string Name { get; }
         public abstract string Description { get; }
         public abstract string[] Aliases { get; }
-        public virtual bool RequiresAdmin => true;
 
         public async Task ExecuteAsync(Message message, TelegramBotClient bot)
         {
