@@ -1,6 +1,4 @@
 using Telegram.Bot;
-using xorWallet.Exceptions;
-using xorWallet.Utils;
 
 namespace xorWallet.Processors
 {

@@ -1,8 +1,6 @@
-using System.Net.Mime;
 using QRCoder;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using xorWallet.Interfaces;
 using xorWallet.Utils;
 
@@ -28,7 +26,7 @@ namespace xorWallet.Callbacks
             byte[] qrCodeString = qrCode.GetGraphic(5);
 
             using var ms = new MemoryStream(qrCodeString);
-            await bot.SendPhoto(callbackQuery.Message.Chat.Id, InputFile.FromStream(ms));
+            await bot.SendPhoto(callbackQuery.Message!.Chat.Id, InputFile.FromStream(ms));
         }
     }
 }

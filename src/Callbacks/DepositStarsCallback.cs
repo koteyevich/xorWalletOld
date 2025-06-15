@@ -29,14 +29,14 @@ namespace xorWallet.Callbacks
                     buttonPay50.Pay = true;
 
                     keyboard.AddButtons(buttonPay15, buttonPay30, buttonPay50);
-                    await bot.SendMessage(callbackQuery.Message.Chat.Id, "Выберите сумму пополнения. \n" +
-                                                                         "⚠️ <b>ВАЖНО:</b> <i>XOR — это внутренняя валюта бота, которая НЕ <b>ИМЕЕТ РЕАЛЬНОЙ ЦЕННОСТИ</b>. Пополнение счёта является исключительно добровольным пожертвованием. <b>Вы НЕ сможете вывести деньги или обменять XOR на реальные средства.</b> Пополняя счёт, вы соглашаетесь с этими условиями.</i>",
+                    await bot.SendMessage(callbackQuery.Message!.Chat.Id, "Выберите сумму пополнения. \n" +
+                                                                          "⚠️ <b>ВАЖНО:</b> <i>XOR — это внутренняя валюта бота, которая НЕ <b>ИМЕЕТ РЕАЛЬНОЙ ЦЕННОСТИ</b>. Пополнение счёта является исключительно добровольным пожертвованием. <b>Вы НЕ сможете вывести деньги или обменять XOR на реальные средства.</b> Пополняя счёт, вы соглашаетесь с этими условиями.</i>",
                         parseMode: ParseMode.Html,
                         replyMarkup: keyboard);
                     break;
                 case "depositStars15":
                     await bot.SendInvoice(
-                        chatId: callbackQuery.Message.Chat.Id,
+                        chatId: callbackQuery.Message!.Chat.Id,
                         title: "Купить 15 XOR",
                         description: "Покупка 15 XOR за 10 звёзд",
                         payload: "purchase-15-xor",
@@ -50,7 +50,7 @@ namespace xorWallet.Callbacks
                     break;
                 case "depositStars30":
                     await bot.SendInvoice(
-                        chatId: callbackQuery.Message.Chat.Id,
+                        chatId: callbackQuery.Message!.Chat.Id,
                         title: "Купить 30 XOR",
                         description: "Покупка 30 XOR за 20 звёзд",
                         payload: "purchase-30-xor",
@@ -64,7 +64,7 @@ namespace xorWallet.Callbacks
                     break;
                 case "depositStars50":
                     await bot.SendInvoice(
-                        chatId: callbackQuery.Message.Chat.Id,
+                        chatId: callbackQuery.Message!.Chat.Id,
                         title: "Купить 50 XOR",
                         description: "Покупка 50 XOR за 35 звёзд",
                         payload: "purchase-50-xor",

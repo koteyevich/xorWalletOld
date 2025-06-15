@@ -18,7 +18,7 @@ namespace xorWallet.Callbacks
             {
                 Chat = new Chat()
                 {
-                    Id = callbackQuery.Message.Chat.Id,
+                    Id = callbackQuery.Message!.Chat.Id,
                 },
                 From = new User()
                 {

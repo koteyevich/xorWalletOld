@@ -55,7 +55,7 @@ namespace xorWallet.Processors
                 }
 
                 var db = new Database();
-                var user = await db.GetUserAsync(message.From.Id);
+                var user = await db.GetUserAsync(message.From!.Id);
 
                 var keyboard = new InlineKeyboardMarkup();
                 var balanceButton = new InlineKeyboardButton($"💰 Баланс: {user.Balance} XOR", "null");
