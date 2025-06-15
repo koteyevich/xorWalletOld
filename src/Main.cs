@@ -24,17 +24,10 @@ namespace xorWallet
             Logger.Bot("Bot starting", "INFO");
 
             cts = new CancellationTokenSource();
+            //bot = new TelegramBotClient(Secrets.TOKEN); // production
 
-            switch (Secrets.SERVER)
-            {
-                case Server.Test:
-                    bot = new TelegramBotClient(new TelegramBotClientOptions(Secrets.TEST_TOKEN,
-                        useTestEnvironment: true));
-                    break;
-                case Server.Production:
-                    bot = new TelegramBotClient(Secrets.PRODUCTION_TOKEN);
-                    break;
-            }
+            bot = new TelegramBotClient(new TelegramBotClientOptions(Secrets.TOKEN,
+                useTestEnvironment: true)); // test server
 
 
             var me = await bot.GetMe();
