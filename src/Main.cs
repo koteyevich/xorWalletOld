@@ -344,7 +344,7 @@ namespace xorWallet
             {
                 Logger.Warn($"Error in OnInlineQuery: {ex.Message}\nStackTrace: {ex.StackTrace}");
                 // Handle network errors
-                if (ex is HttpRequestException || ex is System.Net.Sockets.SocketException)
+                if (ex is HttpRequestException or System.Net.Sockets.SocketException)
                 {
                     Logger.Warn("Network error detected, retrying in 5 seconds");
                     await Task.Delay(5000);
@@ -408,8 +408,6 @@ namespace xorWallet
             }
         }
 
-        // this here is where your creativity can shine.
-        // I chose to send the message that something wrong happened, and send a detailed report in my chat.
         private static async Task OnError(Exception exception, long chatId)
         {
             if (exception is Exceptions.Message)
