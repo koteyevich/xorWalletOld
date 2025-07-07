@@ -2,7 +2,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using xorWallet.Interfaces;
 
-namespace xorWallet.Callbacks
+namespace xorWallet.BotFunctionality.Callbacks
 {
     public class Decline : ICallback
     {

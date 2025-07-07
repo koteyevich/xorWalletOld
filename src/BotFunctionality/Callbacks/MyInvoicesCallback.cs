@@ -1,9 +1,9 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using xorWallet.BotFunctionality.Processors;
 using xorWallet.Interfaces;
-using xorWallet.Processors;
 
-namespace xorWallet.Callbacks
+namespace xorWallet.BotFunctionality.Callbacks
 {
     public class MyInvoicesCallback : ICallback
     {

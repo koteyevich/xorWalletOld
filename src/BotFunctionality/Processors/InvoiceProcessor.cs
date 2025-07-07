@@ -5,7 +5,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using xorWallet.Utils;
 
-namespace xorWallet.Processors
+namespace xorWallet.BotFunctionality.Processors
 {
     public abstract class InvoiceProcessor
     {

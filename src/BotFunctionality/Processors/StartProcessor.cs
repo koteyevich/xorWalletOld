@@ -5,7 +5,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using xorWallet.Models;
 using xorWallet.Utils;
 
-namespace xorWallet.Processors
+namespace xorWallet.BotFunctionality.Processors
 {
     public static class StartProcessor
     {

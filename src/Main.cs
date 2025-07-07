@@ -4,9 +4,9 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.ReplyMarkups;
-using xorWallet.Callbacks;
-using xorWallet.Commands;
-using xorWallet.Processors;
+using xorWallet.BotFunctionality.Callbacks;
+using xorWallet.BotFunctionality.Commands;
+using xorWallet.BotFunctionality.Processors;
 using xorWallet.Utils;
 
 namespace xorWallet

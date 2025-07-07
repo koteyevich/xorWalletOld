@@ -6,7 +6,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using xorWallet.Interfaces;
 using xorWallet.Utils;
 
-namespace xorWallet.Callbacks
+namespace xorWallet.BotFunctionality.Callbacks
 {
     public class DepositStarsCallback : ICallback
     {

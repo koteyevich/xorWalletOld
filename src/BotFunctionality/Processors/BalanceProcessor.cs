@@ -1,6 +1,6 @@
 using Telegram.Bot;
 
-namespace xorWallet.Processors
+namespace xorWallet.BotFunctionality.Processors
 {
     public abstract class BalanceProcessor
     {

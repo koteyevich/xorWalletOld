@@ -1,9 +1,8 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using xorWallet.Interfaces;
-using xorWallet.Utils;
 
-namespace xorWallet.Commands
+namespace xorWallet.BotFunctionality.Commands
 {
     public class CommandRegistry
     {

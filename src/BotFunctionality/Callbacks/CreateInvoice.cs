@@ -3,7 +3,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using xorWallet.Interfaces;
 
-namespace xorWallet.Callbacks
+namespace xorWallet.BotFunctionality.Callbacks
 {
     public class CreateInvoice : ICallback
     {

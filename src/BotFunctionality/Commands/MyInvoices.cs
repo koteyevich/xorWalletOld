@@ -1,9 +1,9 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using xorWallet.BotFunctionality.Processors;
 using xorWallet.Interfaces;
-using xorWallet.Processors;
 
-namespace xorWallet.Commands
+namespace xorWallet.BotFunctionality.Commands
 {
     public class MyInvoices : CommandBase
     {
