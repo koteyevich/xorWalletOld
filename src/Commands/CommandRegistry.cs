@@ -48,11 +48,6 @@ namespace xorWallet.Commands
 
             if (matchingCommand.Value != null)
             {
-                if (matchingCommand.Value is IDebugCommand)
-                {
-                    Logger.Command($"Processing debug command: {normalizedCommand}", "DEBUG");
-                }
-
                 await matchingCommand.Value.ExecuteAsync(message, bot);
             }
             else if (normalizedCommand.StartsWith("/help"))
@@ -69,12 +64,6 @@ namespace xorWallet.Commands
             foreach (var command in commands.Values.Distinct())
             {
                 if (!listed.Add(command)) continue;
-
-                if (command is IDebugCommand debugCommand && debugCommand.RequiresDeveloper)
-                {
-                    if (message.From != null && !await Helpers.CheckDeveloper(message.From.Id))
-                        continue;
-                }
 
                 string aliasText = command.Aliases.Length > 0
                     ? $" ({string.Join(", ", command.Aliases)})"
