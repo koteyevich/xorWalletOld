@@ -3,7 +3,7 @@ using Telegram.Bot.Types;
 using xorWallet.Interfaces;
 using Message = xorWallet.Exceptions.Message;
 
-namespace xorWallet.Callbacks
+namespace xorWallet.BotFunctionality.Callbacks
 {
     public class RevokeInvoiceCallback : ICallback
     {

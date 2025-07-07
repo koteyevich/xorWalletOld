@@ -1,13 +1,13 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using xorWallet.BotFunctionality.Processors;
 using xorWallet.Interfaces;
-using xorWallet.Processors;
 
-namespace xorWallet.Callbacks
+namespace xorWallet.BotFunctionality.Callbacks
 {
-    public class MyChecksCallback : ICallback
+    public class MyInvoicesCallback : ICallback
     {
-        public string Name => "myChecks";
+        public string Name => "myInvoices";
 
         public string[] Aliases => [];
 
@@ -26,7 +26,7 @@ namespace xorWallet.Callbacks
                 }
             };
 
-            await MyChecksProcessor.MyChecksAsync(message, bot);
+            await MyInvoicesProcessor.MyInvoicesAsync(message, bot);
         }
     }
 }

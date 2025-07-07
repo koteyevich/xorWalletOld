@@ -1,8 +1,8 @@
 using System.Text;
 using MongoDB.Driver;
+using xorWallet.BotFunctionality.Processors;
 using xorWallet.Exceptions;
 using xorWallet.Models;
-using xorWallet.Processors;
 using xorWallet.Utils;
 
 namespace xorWallet

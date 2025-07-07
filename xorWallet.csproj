@@ -5,12 +5,18 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
       <PackageReference Include="qrcoder" Version="1.6.0" />
       <PackageReference Include="Telegram.Bot" Version="22.5.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="assets\" />
+      <Folder Include="src\BotFunctionality\" />
     </ItemGroup>
 
 </Project>
